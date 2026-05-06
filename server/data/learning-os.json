@@ -1,0 +1,576 @@
+{
+  "app": {
+    "session": null,
+    "preferences": {
+      "theme": "dark",
+      "language": "English",
+      "sidebarOpen": false,
+      "widgetOrder": [
+        "progress",
+        "classes",
+        "assignments",
+        "activity",
+        "assistant",
+        "calendar"
+      ]
+    },
+    "users": [
+      {
+        "id": "user-student",
+        "name": "Alex Rivers",
+        "email": "alex@nexus.dev",
+        "role": "student",
+        "title": "Product Design Student",
+        "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop",
+        "bio": "Design systems student focused on accessible interfaces and faster feedback loops.",
+        "locale": "en-US",
+        "xp": 1280,
+        "badges": [
+          "Fast Learner",
+          "Discussion Leader",
+          "7 Day Streak"
+        ],
+        "passwordHash": "978c26d91294fd7eba1798cb475d5da104f51a787c5b25e3940b26ec940c4d9a"
+      },
+      {
+        "id": "user-teacher",
+        "name": "Sarah Jenkins",
+        "email": "sarah@nexus.dev",
+        "role": "teacher",
+        "title": "Senior Instructor",
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop",
+        "bio": "Teaches front-end architecture, collaboration patterns, and rubric-driven assessment.",
+        "locale": "en-US",
+        "xp": 2140,
+        "badges": [
+          "Top Mentor",
+          "Course Builder",
+          "AI Reviewer"
+        ],
+        "passwordHash": "978c26d91294fd7eba1798cb475d5da104f51a787c5b25e3940b26ec940c4d9a"
+      },
+      {
+        "id": "user-admin",
+        "name": "Noah Patel",
+        "email": "admin@nexus.dev",
+        "role": "admin",
+        "title": "Platform Administrator",
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop",
+        "bio": "Oversees schools, permissions, analytics, and platform security policies.",
+        "locale": "en-US",
+        "xp": 3260,
+        "badges": [
+          "Security Lead",
+          "Platform Owner",
+          "Incident Ready"
+        ],
+        "passwordHash": "978c26d91294fd7eba1798cb475d5da104f51a787c5b25e3940b26ec940c4d9a"
+      }
+    ],
+    "classes": [
+      {
+        "id": "class-design",
+        "code": "NX-2048",
+        "title": "Advanced UI Systems",
+        "subject": "Design",
+        "section": "Section A",
+        "teacherId": "user-teacher",
+        "teacherName": "Sarah Jenkins",
+        "color": "#7c3aed",
+        "description": "Design systems, accessibility patterns, and collaborative critiques.",
+        "students": 38,
+        "archived": false,
+        "progress": 72,
+        "nextDeadline": "Today · 3:00 PM",
+        "meetingTime": "Tue 10:00 AM",
+        "tags": [
+          "Design Systems",
+          "Accessibility",
+          "Critique"
+        ],
+        "sections": [
+          {
+            "id": "design-core",
+            "name": "Core Cohort",
+            "studentCount": 24
+          },
+          {
+            "id": "design-advanced",
+            "name": "Advanced Studio",
+            "studentCount": 14
+          }
+        ],
+        "resourceCount": 18,
+        "unreadMessages": 4
+      },
+      {
+        "id": "class-frontend",
+        "code": "NX-7741",
+        "title": "Modern Frontend Architecture",
+        "subject": "Engineering",
+        "section": "Section B",
+        "teacherId": "user-teacher",
+        "teacherName": "Sarah Jenkins",
+        "color": "#2563eb",
+        "description": "Component architecture, state management, and deployment workflows.",
+        "students": 31,
+        "archived": false,
+        "progress": 58,
+        "nextDeadline": "Tomorrow · 9:00 AM",
+        "meetingTime": "Thu 2:00 PM",
+        "tags": [
+          "React",
+          "State",
+          "Performance"
+        ],
+        "sections": [
+          {
+            "id": "frontend-live",
+            "name": "Live Build Lab",
+            "studentCount": 16
+          },
+          {
+            "id": "frontend-review",
+            "name": "Review Circle",
+            "studentCount": 15
+          }
+        ],
+        "resourceCount": 24,
+        "unreadMessages": 2
+      },
+      {
+        "id": "class-ops",
+        "code": "NX-9005",
+        "title": "Learning Operations",
+        "subject": "Administration",
+        "section": "School Wide",
+        "teacherId": "user-admin",
+        "teacherName": "Noah Patel",
+        "color": "#0f766e",
+        "description": "Attendance, policy management, and student support workflows.",
+        "students": 124,
+        "archived": false,
+        "progress": 91,
+        "nextDeadline": "Friday · 11:30 AM",
+        "meetingTime": "Mon 1:00 PM",
+        "tags": [
+          "Operations",
+          "Policy",
+          "Insights"
+        ],
+        "sections": [
+          {
+            "id": "ops-campus",
+            "name": "Campus Team",
+            "studentCount": 44
+          },
+          {
+            "id": "ops-support",
+            "name": "Support Team",
+            "studentCount": 80
+          }
+        ],
+        "resourceCount": 11,
+        "unreadMessages": 0
+      }
+    ],
+    "assignments": [
+      {
+        "id": "assignment-1",
+        "classId": "class-design",
+        "title": "Microinteraction Audit",
+        "kind": "assignment",
+        "dueDate": "Today · 5:00 PM",
+        "status": "assigned",
+        "maxPoints": 100,
+        "submissions": 19,
+        "averageScore": 86,
+        "manualReview": true,
+        "aiPlagiarismScore": 9,
+        "description": "Review three interfaces and annotate where motion can reduce friction.",
+        "rubric": [
+          "Clarity of examples",
+          "Actionable feedback",
+          "Accessibility awareness"
+        ]
+      },
+      {
+        "id": "assignment-2",
+        "classId": "class-frontend",
+        "title": "Component Quiz: State Sync",
+        "kind": "quiz",
+        "dueDate": "Tomorrow · 11:30 AM",
+        "status": "submitted",
+        "maxPoints": 20,
+        "submissions": 27,
+        "averageScore": 18,
+        "manualReview": false,
+        "aiPlagiarismScore": 4,
+        "description": "Auto-graded quiz covering event flow, state, and effects.",
+        "rubric": [
+          "Correct answers",
+          "Reasoning accuracy"
+        ]
+      },
+      {
+        "id": "assignment-3",
+        "classId": "class-ops",
+        "title": "Attendance Forecast Memo",
+        "kind": "project",
+        "dueDate": "Friday · 12:00 PM",
+        "status": "graded",
+        "maxPoints": 50,
+        "submissions": 12,
+        "averageScore": 44,
+        "manualReview": true,
+        "aiPlagiarismScore": 2,
+        "description": "Summarize attendance trends and propose interventions.",
+        "rubric": [
+          "Trend analysis",
+          "Recommendation quality",
+          "Presentation"
+        ]
+      }
+    ],
+    "discussions": [
+      {
+        "id": "thread-1",
+        "classId": "class-design",
+        "author": "Ava Chen",
+        "role": "student",
+        "message": "Can we get a rubric example for the microinteraction audit? @Sarah",
+        "time": "8 min ago",
+        "replies": 4,
+        "mentions": [
+          "Sarah"
+        ],
+        "pinned": true
+      },
+      {
+        "id": "thread-2",
+        "classId": "class-frontend",
+        "author": "Sarah Jenkins",
+        "role": "teacher",
+        "message": "I posted a starter checklist for the quiz review. Focus on state transitions.",
+        "time": "34 min ago",
+        "replies": 7,
+        "mentions": [],
+        "pinned": false
+      },
+      {
+        "id": "thread-3",
+        "classId": "class-ops",
+        "author": "Noah Patel",
+        "role": "admin",
+        "message": "Attendance export is now synced with the district feed.",
+        "time": "1 hr ago",
+        "replies": 2,
+        "mentions": [],
+        "pinned": false
+      }
+    ],
+    "messages": [
+      {
+        "id": "message-1",
+        "classId": "class-design",
+        "sender": "Sarah Jenkins",
+        "role": "teacher",
+        "message": "Please post your wireframes in the class folder before tomorrow.",
+        "time": "9:02 AM"
+      },
+      {
+        "id": "message-2",
+        "classId": "class-design",
+        "sender": "Alex Rivers",
+        "role": "student",
+        "message": "Uploaded the first draft. I also added keyboard focus states.",
+        "time": "9:08 AM"
+      },
+      {
+        "id": "message-3",
+        "classId": "class-frontend",
+        "sender": "Sarah Jenkins",
+        "role": "teacher",
+        "message": "Office hours move to 2 PM because of the design review.",
+        "time": "9:10 AM"
+      }
+    ],
+    "notifications": [
+      {
+        "id": "note-1",
+        "title": "Assignment due soon",
+        "description": "Microinteraction Audit is due in 3 hours.",
+        "priority": "high",
+        "unread": true,
+        "time": "5m ago",
+        "kind": "deadline"
+      },
+      {
+        "id": "note-2",
+        "title": "New teacher feedback",
+        "description": "Sarah left rubric notes on your latest submission.",
+        "priority": "normal",
+        "unread": true,
+        "time": "18m ago",
+        "kind": "feedback"
+      },
+      {
+        "id": "note-3",
+        "title": "Calendar sync",
+        "description": "External calendar connected successfully.",
+        "priority": "low",
+        "unread": false,
+        "time": "1h ago",
+        "kind": "integration"
+      }
+    ],
+    "events": [
+      {
+        "id": "event-1",
+        "title": "Microinteraction Review",
+        "classId": "class-design",
+        "date": "2026-05-06",
+        "startTime": "15:00",
+        "endTime": "15:30",
+        "type": "deadline",
+        "color": "#7c3aed"
+      },
+      {
+        "id": "event-2",
+        "title": "Frontend Office Hours",
+        "classId": "class-frontend",
+        "date": "2026-05-07",
+        "startTime": "14:00",
+        "endTime": "15:00",
+        "type": "meeting",
+        "color": "#2563eb"
+      },
+      {
+        "id": "event-3",
+        "title": "District Sync Check",
+        "classId": "class-ops",
+        "date": "2026-05-08",
+        "startTime": "11:30",
+        "endTime": "12:00",
+        "type": "class",
+        "color": "#0f766e"
+      }
+    ],
+    "resources": [
+      {
+        "id": "resource-1",
+        "classId": "class-design",
+        "name": "Critique rubric.pdf",
+        "type": "document",
+        "size": "430 KB",
+        "updatedAt": "Today",
+        "preview": "Structured rubric for design critiques and peer review."
+      },
+      {
+        "id": "resource-2",
+        "classId": "class-frontend",
+        "name": "State machine workshop.mp4",
+        "type": "video",
+        "size": "248 MB",
+        "updatedAt": "Yesterday",
+        "preview": "Recorded walkthrough of event flow and reducer design."
+      },
+      {
+        "id": "resource-3",
+        "classId": "class-ops",
+        "name": "Attendance exports",
+        "type": "folder",
+        "size": "1.8 GB",
+        "updatedAt": "2 days ago",
+        "preview": "District-level reports and term snapshots."
+      }
+    ]
+  },
+  "submissions": [
+    {
+      "id": "submission-design-1",
+      "assignmentId": "assignment-1",
+      "studentId": "user-student",
+      "contentText": "I reviewed the interface hierarchy, improved spacing, and documented the keyboard focus states.",
+      "submittedAt": "2026-05-06T08:25:00.000Z",
+      "score": 89,
+      "teacherFeedback": "Good accessibility awareness and clear rationale.",
+      "aiFeedback": "Strong draft. Add one more concrete example of a reduced-friction interaction.",
+      "plagiarismScore": 6,
+      "qualityScore": 88,
+      "lateFlag": false
+    },
+    {
+      "id": "submission-frontend-1",
+      "assignmentId": "assignment-2",
+      "studentId": "user-student",
+      "contentText": "The component tree needs a cleaner separation between view state and server state.",
+      "submittedAt": "2026-05-05T13:10:00.000Z",
+      "score": 93,
+      "teacherFeedback": "Excellent conceptual explanation.",
+      "aiFeedback": "You show strong synthesis. Add one paragraph on event handling edge cases.",
+      "plagiarismScore": 2,
+      "qualityScore": 91,
+      "lateFlag": false
+    },
+    {
+      "id": "submission-ops-1",
+      "assignmentId": "assignment-3",
+      "studentId": "user-student",
+      "contentText": "Attendance trends suggest weekly intervention reminders and a short parent update may improve turnout.",
+      "submittedAt": "2026-05-04T11:30:00.000Z",
+      "score": 95,
+      "teacherFeedback": "Actionable and data-driven.",
+      "aiFeedback": "The memo is well aligned with the rubric and can be shortened slightly.",
+      "plagiarismScore": 1,
+      "qualityScore": 94,
+      "lateFlag": false
+    }
+  ],
+  "analyticsEvents": [
+    {
+      "id": "event-01dc148c-ae52-41d0-af32-6cc41aeca87f",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-06T09:27:19.534Z"
+    },
+    {
+      "id": "event-89c81525-607c-40a1-bda8-3c984b6ee773",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T09:26:42.789Z"
+    },
+    {
+      "id": "event-b341fe3f-4748-4101-a13f-fea3de79f30a",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T09:25:50.522Z"
+    },
+    {
+      "id": "event-41a56104-b88c-442d-9667-c27bbf1ccdd1",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T09:23:37.084Z"
+    },
+    {
+      "id": "event-class-opened",
+      "userId": "user-student",
+      "classId": "class-design",
+      "type": "classroom",
+      "name": "class_opened",
+      "payload": {
+        "route": "/app"
+      },
+      "createdAt": "2026-05-06T09:00:00.000Z"
+    },
+    {
+      "id": "event-assignment-viewed",
+      "userId": "user-teacher",
+      "classId": "class-frontend",
+      "type": "assignment",
+      "name": "assignment_reviewed",
+      "payload": {
+        "assignmentId": "assignment-2"
+      },
+      "createdAt": "2026-05-06T09:30:00.000Z"
+    },
+    {
+      "id": "event-admin-audit",
+      "userId": "user-admin",
+      "type": "admin",
+      "name": "platform_audited",
+      "payload": {
+        "activeClasses": 3
+      },
+      "createdAt": "2026-05-06T10:15:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODA1OTYzOTUzMiwiZXhwIjoxNzc4MDg4NDM5NTMyLCJqdGkiOiJkNTAyOWM2Mi01NjZiLTQyMTktYmUyNS04NmQ3NGMzMjY5MjcifQ.Dhm74gYbPUEa2R07xykMlJE36rqWb4bjcXvcj3xdyE0",
+      "userId": "user-teacher",
+      "role": "teacher",
+      "issuedAt": 1778059639533,
+      "expiresAt": 1778088439532
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODA1OTYwMjc4OCwiZXhwIjoxNzc4MDg4NDAyNzg4LCJqdGkiOiJjNDFjMTU0OC03YTRjLTRmY2EtYjk2NS1mM2E0NzIzYzkwNDUifQ.A2O6FVSEZsJDIWgf0PA2C1gSGbi-a9rpr_Cn5nEY1fc",
+      "userId": "user-student",
+      "role": "student",
+      "issuedAt": 1778059602788,
+      "expiresAt": 1778088402788
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal-user-student",
+      "userId": "user-student",
+      "title": "Complete the next learning mission",
+      "targetType": "completion",
+      "targetValue": 100,
+      "progressValue": 78,
+      "dueAt": "2026-05-08T17:00:00.000Z",
+      "status": "active"
+    },
+    {
+      "id": "goal-user-teacher",
+      "userId": "user-teacher",
+      "title": "Review outstanding work",
+      "targetType": "operations",
+      "targetValue": 1,
+      "progressValue": 92,
+      "status": "active"
+    },
+    {
+      "id": "goal-user-admin",
+      "userId": "user-admin",
+      "title": "Monitor system health",
+      "targetType": "operations",
+      "targetValue": 1,
+      "progressValue": 99,
+      "status": "active"
+    }
+  ],
+  "permissions": [
+    {
+      "id": "perm-user-student-student",
+      "userId": "user-student",
+      "permissionKey": "classroom:view",
+      "scopeType": "global",
+      "scopeId": "*",
+      "createdAt": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": "perm-user-teacher-teacher",
+      "userId": "user-teacher",
+      "permissionKey": "classroom:manage",
+      "scopeType": "global",
+      "scopeId": "*",
+      "createdAt": "2026-05-06T00:00:00.000Z"
+    },
+    {
+      "id": "perm-user-admin-admin",
+      "userId": "user-admin",
+      "permissionKey": "platform:admin",
+      "scopeType": "global",
+      "scopeId": "*",
+      "createdAt": "2026-05-06T00:00:00.000Z"
+    }
+  ]
+}
