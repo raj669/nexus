@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -38,6 +38,8 @@ import {
   Workflow,
 } from 'lucide-react';
 import { useLms } from '../context/LmsContext';
+import { api } from '../lib/api';
+import type { AnalyticsOverviewResponse, DashboardStateResponse } from '../lib/api';
 import { analyticsByRole } from '../lib/lmsData';
 import {
   Assignment,
@@ -102,7 +104,7 @@ const quickAccounts = [
 
 const metricClass = 'rounded-3xl border border-border-subtle bg-[var(--panel)] p-5 shadow-[0_20px_80px_rgba(15,23,42,0.18)]';
 
-function StatCard({ title, value, note, icon: Icon, accent }: { title: string; value: string | number; note: string; icon: typeof Sparkles; accent: string }) {
+function StatCard({ title, value, note, icon: Icon, accent }: { title: string; value: string | number; note: string; icon: typeof Sparkles; accent: string; key?: string | number }) {
   return (
     <div className={metricClass}>
       <div className="flex items-start justify-between gap-4">
@@ -127,7 +129,7 @@ function ProgressBar({ value }: { value: number }) {
   );
 }
 
-function ShellSection({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode }) {
+function ShellSection({ title, subtitle, action, children }: { title: string; subtitle?: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className={metricClass}>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -142,7 +144,7 @@ function ShellSection({ title, subtitle, action, children }: { title: string; su
   );
 }
 
-function ViewPill({ label }: { label: string }) {
+function ViewPill({ label }: { label: string; key?: string | number }) {
   return <span className="rounded-full border border-border-subtle bg-white/5 px-3 py-1 text-xs font-medium text-text-secondary">{label}</span>;
 }
 
@@ -285,28 +287,79 @@ export function LoginPage() {
 }
 
 export function DashboardPage() {
-  const { state, currentUser, analyticsKey, reorderWidgets } = useLms();
-  const analytics = analyticsByRole[analyticsKey];
-  const classes = state.classes.filter((item) => !item.archived).slice(0, 4);
-  const assignments = state.assignments.slice(0, 4);
-  const notifications = state.notifications.slice(0, 4);
+  const { currentUser } = useLms();
+  const [snapshot, setSnapshot] = useState<DashboardStateResponse | null>(null);
+  const [overview, setOverview] = useState<AnalyticsOverviewResponse | null>(null);
   const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
-  const widgetOrder = state.preferences.widgetOrder.length ? state.preferences.widgetOrder : widgetOrderMap;
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(widgetOrderMap);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      try {
+        const [stateResponse, overviewResponse] = await Promise.all([
+          api.state(),
+          api.analyticsOverview(),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        setSnapshot(stateResponse);
+        setOverview(overviewResponse);
+        setWidgetOrder(stateResponse.app.preferences.widgetOrder.length ? stateResponse.app.preferences.widgetOrder : widgetOrderMap);
+        setError('');
+      } catch (loadError) {
+        if (!active) {
+          return;
+        }
+
+        setError(loadError instanceof Error ? loadError.message : 'Failed to load dashboard data.');
+      }
+    };
+
+    void load();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const app = snapshot?.app;
+  const currentSnapshotUser = app?.users.find((user) => user.id === snapshot?.session?.userId) ?? currentUser;
+  const analytics = overview?.analytics ?? analyticsByRole[(snapshot?.session?.role ?? currentSnapshotUser?.role ?? 'student') as keyof typeof analyticsByRole];
+  const classes = app?.classes.filter((item) => !item.archived).slice(0, 4) ?? [];
+  const assignments = app?.assignments.slice(0, 4) ?? [];
+  const notifications = app?.notifications.slice(0, 4) ?? [];
 
   const orderedWidgets = widgetOrder
     .map((type) => ({ type, meta: widgetMeta[type as keyof typeof widgetMeta] }))
     .filter((item) => item.meta);
 
   const moveWidget = (from: number, to: number) => {
-    if (to < 0 || to >= widgetOrder.length) {
-      return;
-    }
+    setWidgetOrder((previous) => {
+      if (to < 0 || to >= previous.length) {
+        return previous;
+      }
 
-    const next = [...widgetOrder];
-    const [item] = next.splice(from, 1);
-    next.splice(to, 0, item);
-    reorderWidgets(next);
+      const next = [...previous];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      void api.updateWidgetOrder(next).catch(() => setWidgetOrder(previous));
+      return next;
+    });
   };
+
+  if (error) {
+    return (
+      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-200">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -318,12 +371,12 @@ export function DashboardPage() {
               Personalized workspace
             </div>
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Welcome back, {currentUser?.name.split(' ')[0] ?? 'Learner'}.
+              Welcome back, {currentSnapshotUser?.name.split(' ')[0] ?? 'Learner'}.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-white/80">
-              {currentUser?.role === 'teacher'
+              {currentSnapshotUser?.role === 'teacher'
                 ? 'Your classrooms are live, grading queues are clear, and learners have fresh feedback waiting.'
-                : currentUser?.role === 'admin'
+                : currentSnapshotUser?.role === 'admin'
                   ? 'Platform health is stable. Monitor classes, insights, and security controls from one place.'
                   : 'Your weekly plan is on track. You have one due assignment, three active discussions, and a full schedule.'}
             </p>
@@ -338,10 +391,10 @@ export function DashboardPage() {
 
       <section className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-4">
         {[
-          { title: 'Classes', value: state.classes.filter((item) => !item.archived).length, note: 'Open classrooms and sections', icon: BookOpen, accent: 'bg-primary' },
-          { title: 'Assignments', value: state.assignments.length, note: 'Tracked across quizzes, projects, and essays', icon: ClipboardCheck, accent: 'bg-secondary' },
-          { title: 'Notifications', value: state.notifications.filter((item) => item.unread).length, note: 'Unread priority alerts', icon: BellIcon, accent: 'bg-amber-500' },
-          { title: 'Resources', value: state.resources.length, note: 'Files, folders, and video content', icon: FolderOpen, accent: 'bg-teal-500' },
+          { title: 'Classes', value: app?.classes.filter((item) => !item.archived).length ?? 0, note: 'Open classrooms and sections', icon: BookOpen, accent: 'bg-primary' },
+          { title: 'Assignments', value: app?.assignments.length ?? 0, note: 'Tracked across quizzes, projects, and essays', icon: ClipboardCheck, accent: 'bg-secondary' },
+          { title: 'Notifications', value: app?.notifications.filter((item) => item.unread).length ?? 0, note: 'Unread priority alerts', icon: BellIcon, accent: 'bg-amber-500' },
+          { title: 'Resources', value: app?.resources.length ?? 0, note: 'Files, folders, and video content', icon: FolderOpen, accent: 'bg-teal-500' },
         ].map((item) => (
           <StatCard key={item.title} title={item.title} value={item.value} note={item.note} icon={item.icon} accent={item.accent} />
         ))}
@@ -460,7 +513,7 @@ export function DashboardPage() {
 
                       {entry.type === 'activity' ? (
                         <div className="space-y-3">
-                          {state.discussions.slice(0, 3).map((thread) => (
+                          {app?.discussions.slice(0, 3).map((thread) => (
                             <div key={thread.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
                               <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -489,7 +542,7 @@ export function DashboardPage() {
 
                       {entry.type === 'calendar' ? (
                         <div className="space-y-3">
-                          {state.events.slice(0, 3).map((event) => (
+                          {app?.events.slice(0, 3).map((event) => (
                             <div key={event.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
                               <div className="flex items-center justify-between gap-3">
                                 <div>
@@ -521,7 +574,7 @@ export function DashboardPage() {
 
           <ShellSection title="Today at a glance" subtitle="A compact feed of tasks, meetings, and reminders.">
             <div className="space-y-3">
-              {state.events.slice(0, 3).map((event) => (
+              {app?.events.slice(0, 3).map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
@@ -532,7 +585,7 @@ export function DashboardPage() {
   );
 }
 
-function NotificationCard({ notification }: { notification: NotificationItem }) {
+function NotificationCard({ notification }: { notification: NotificationItem; key?: string | number }) {
   const accent = notification.priority === 'high' ? 'bg-red-500/15 text-red-200 border-red-500/20' : notification.priority === 'normal' ? 'bg-blue-500/15 text-blue-200 border-blue-500/20' : 'bg-emerald-500/15 text-emerald-200 border-emerald-500/20';
   return (
     <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
@@ -551,7 +604,7 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
   );
 }
 
-function EventCard({ event }: { event: CalendarEvent }) {
+function EventCard({ event }: { event: CalendarEvent; key?: string | number }) {
   return (
     <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -712,7 +765,7 @@ export function AssignmentsPage() {
   );
 }
 
-function AssignmentCard({ assignment, classes }: { assignment: Assignment; classes: Classroom[] }) {
+function AssignmentCard({ assignment, classes }: { assignment: Assignment; classes: Classroom[]; key?: string | number }) {
   const classroom = classes.find((item) => item.id === assignment.classId);
   return (
     <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
@@ -815,7 +868,7 @@ export function CollaborationPage() {
   );
 }
 
-function ThreadCard({ thread }: { thread: DiscussionThread }) {
+function ThreadCard({ thread }: { thread: DiscussionThread; key?: string | number }) {
   return (
     <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -837,7 +890,7 @@ function ThreadCard({ thread }: { thread: DiscussionThread }) {
   );
 }
 
-function ChatBubble({ message }: { message: { sender: string; message: string; time: string; role: Role } }) {
+function ChatBubble({ message }: { message: { sender: string; message: string; time: string; role: Role }; key?: string | number }) {
   return (
     <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
       <div className="flex items-center justify-between gap-3">
