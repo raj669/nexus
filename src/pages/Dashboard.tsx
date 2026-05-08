@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
   Clock,
@@ -19,6 +20,7 @@ const fallbackStats = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [snapshot, setSnapshot] = useState<DashboardStateResponse | null>(null);
   const [overview, setOverview] = useState<AnalyticsOverviewResponse | null>(null);
   const [error, setError] = useState('');
@@ -89,11 +91,11 @@ export default function Dashboard() {
             {overview?.nextBestAction ? ` ${overview.nextBestAction.title}.` : ''}
           </p>
           <div className="flex gap-4">
-            <button className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark">
+            <button type="button" onClick={() => navigate('/app/classes')} className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark">
               <PlayCircle className="h-5 w-5" />
               Continue Learning
             </button>
-            <button className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white transition-all hover:bg-white/10">
+            <button type="button" onClick={() => navigate('/app/calendar')} className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white transition-all hover:bg-white/10">
               View Schedule
             </button>
           </div>
@@ -137,7 +139,7 @@ export default function Dashboard() {
         <section className="space-y-6 xl:col-span-2">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-display font-bold text-white">Active Courses</h3>
-            <button className="text-sm font-semibold text-primary hover:underline">View All</button>
+            <button type="button" onClick={() => navigate('/app/classes')} className="text-sm font-semibold text-primary hover:underline">View All</button>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -179,7 +181,7 @@ export default function Dashboard() {
                       <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                         {course.students} Learners
                       </span>
-                      <button className="rounded-lg bg-white/5 p-2 text-white transition-all hover:bg-primary hover:text-white">
+                      <button type="button" aria-label={`Open ${course.title}`} onClick={() => navigate('/app/classes')} className="rounded-lg bg-white/5 p-2 text-white transition-all hover:bg-primary hover:text-white">
                         <PlayCircle className="h-4 w-4" />
                       </button>
                     </div>
@@ -203,7 +205,7 @@ export default function Dashboard() {
                   <h5 className="text-sm font-semibold text-white transition-colors group-hover:text-primary">{event.title}</h5>
                   <p className="text-xs text-text-muted">{event.type}</p>
                 </div>
-                <button className="text-text-muted transition-colors hover:text-white">
+                <button type="button" aria-label={`View options for ${event.title}`} onClick={() => navigate('/app/calendar')} className="text-text-muted transition-colors hover:text-white">
                   <MoreVertical className="h-4 w-4" />
                 </button>
               </div>
@@ -218,7 +220,7 @@ export default function Dashboard() {
                   ? `${overview.health.activeUsers} active users, ${overview.health.openClasses} open classes, ${overview.health.pendingActions} pending actions.`
                   : 'Loading platform summary.'}
               </p>
-              <button className="rounded-lg bg-white px-4 py-2 text-xs font-bold text-bg-main transition-transform hover:scale-105">
+              <button type="button" onClick={() => navigate('/app/analytics')} className="rounded-lg bg-white px-4 py-2 text-xs font-bold text-bg-main transition-transform hover:scale-105">
                 Open Insights
               </button>
             </div>

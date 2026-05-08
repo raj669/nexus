@@ -6,8 +6,8 @@
       "language": "English",
       "sidebarOpen": false,
       "widgetOrder": [
-        "progress",
         "classes",
+        "progress",
         "assignments",
         "activity",
         "assistant",
@@ -429,6 +429,86 @@
   ],
   "analyticsEvents": [
     {
+      "id": "event-547e85cb-1da1-4cb1-ac9b-2d4994d9d097",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-06T12:05:26.678Z"
+    },
+    {
+      "id": "event-1975a019-5c3d-4a4e-9be0-3ba51783f774",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T11:27:35.955Z"
+    },
+    {
+      "id": "event-13164cb8-7584-45c2-ae7a-914cae8ede6f",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T11:23:51.149Z"
+    },
+    {
+      "id": "event-3ca0afca-e566-4798-a2d8-4311db674b0f",
+      "userId": "user-admin",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "admin"
+      },
+      "createdAt": "2026-05-06T11:19:04.549Z"
+    },
+    {
+      "id": "event-a80462d4-cce8-4cea-883a-3edded324b99",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-06T11:17:19.191Z"
+    },
+    {
+      "id": "event-6d0cb159-e707-46f8-ae33-699500883f26",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T11:16:11.529Z"
+    },
+    {
+      "id": "event-c119ceb8-f8b5-41a6-94f7-84238e5870b5",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-06T11:14:44.534Z"
+    },
+    {
+      "id": "event-9ff83e6a-2577-4fea-925a-2ffb1443c77d",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-06T11:12:37.847Z"
+    },
+    {
       "id": "event-03151e16-ffd0-4775-9322-93735397d9b7",
       "userId": "user-student",
       "type": "auth",
@@ -513,18 +593,25 @@
   ],
   "sessions": [
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODA2NDEyNTIyNCwiZXhwIjoxNzc4MDkyOTI1MjI0LCJqdGkiOiI5N2U1Yjc2ZC1lMTRlLTQwZDQtOTg3Yy02NTIyZGY4ZWRkNTgifQ.O3GyArD_4zYJvpJTSfuFeTXuI-HEiJfJuNRvXmX7ZqY",
-      "userId": "user-student",
-      "role": "student",
-      "issuedAt": 1778064125225,
-      "expiresAt": 1778092925224
-    },
-    {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODA1OTYzOTUzMiwiZXhwIjoxNzc4MDg4NDM5NTMyLCJqdGkiOiJkNTAyOWM2Mi01NjZiLTQyMTktYmUyNS04NmQ3NGMzMjY5MjcifQ.Dhm74gYbPUEa2R07xykMlJE36rqWb4bjcXvcj3xdyE0",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODA2OTEyNjY3NiwiZXhwIjoxNzc4MDk3OTI2Njc2LCJqdGkiOiI4MmU0YzAyNC1jZDc4LTRhNTgtOWRiZi00MTBjMTRhZmI0YmUifQ.xSOYZ8jAL4pd7RKowsaELBUvKaXVCYrsW5acv0V5Rkg",
       "userId": "user-teacher",
       "role": "teacher",
-      "issuedAt": 1778059639533,
-      "expiresAt": 1778088439532
+      "issuedAt": 1778069126677,
+      "expiresAt": 1778097926676
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODA2Njg1NTk1MSwiZXhwIjoxNzc4MDk1NjU1OTUxLCJqdGkiOiI5NGUwZWZiYi1hMzQ1LTQ2MzItYTk3Ny03NDhmNzQwYTY3MWIifQ.eQUyB0jTvh-xIQa52oDtjCSPhpVU8A_ZtY2gBt3T474",
+      "userId": "user-student",
+      "role": "student",
+      "issuedAt": 1778066855952,
+      "expiresAt": 1778095655951
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc4MDY2MzQ0NTQ2LCJleHAiOjE3NzgwOTUxNDQ1NDYsImp0aSI6ImI0ODM4ZWRlLTJjNjQtNDQzZC05MDIwLTg2Yjg1MTcxZGE1NCJ9.4EqkhR-qwh4y5icsXqRXMMCe6spXRmoQgRqNss5pyCg",
+      "userId": "user-admin",
+      "role": "admin",
+      "issuedAt": 1778066344546,
+      "expiresAt": 1778095144546
     }
   ],
   "goals": [

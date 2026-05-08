@@ -97,6 +97,14 @@ const loadState = (): AppState => {
     const parsed = JSON.parse(raw) as Partial<AppState>;
     const base = createInitialState();
 
+    // Normalize classrooms to ensure they have enrolledStudentIds
+    const classes = parsed.classes?.length 
+      ? parsed.classes.map((classroom: any) => ({
+          ...classroom,
+          enrolledStudentIds: classroom.enrolledStudentIds || [],
+        }))
+      : base.classes;
+
     return {
       ...base,
       ...parsed,
@@ -106,7 +114,7 @@ const loadState = (): AppState => {
         widgetOrder: parsed.preferences?.widgetOrder?.length ? parsed.preferences.widgetOrder : base.preferences.widgetOrder,
       },
       users: parsed.users?.length ? parsed.users : base.users,
-      classes: parsed.classes?.length ? parsed.classes : base.classes,
+      classes,
       assignments: parsed.assignments?.length ? parsed.assignments : base.assignments,
       discussions: parsed.discussions?.length ? parsed.discussions : base.discussions,
       messages: parsed.messages?.length ? parsed.messages : base.messages,
@@ -271,6 +279,7 @@ export function LmsProvider({ children }: { children: ReactNode }) {
       sections: [{ id: buildId('section'), name: section, studentCount: 0 }],
       resourceCount: 0,
       unreadMessages: 0,
+      enrolledStudentIds: [],
     };
 
     setState((previous) => ({
@@ -297,10 +306,32 @@ export function LmsProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Check if the current user is already enrolled in this class
+    if (currentUser && classroom.enrolledStudentIds.includes(currentUser.id)) {
+      setState((previous) => ({
+        ...previous,
+        notifications: [
+          {
+            id: buildId('note'),
+            title: 'Already enrolled',
+            description: `You are already enrolled in ${classroom.title}.`,
+            priority: 'normal',
+            unread: true,
+            time: 'Just now',
+            kind: 'enrollment',
+          },
+          ...previous.notifications,
+        ],
+      }));
+      return;
+    }
+
     setState((previous) => ({
       ...previous,
       classes: previous.classes.map((item) =>
-        item.id === classroom.id ? { ...item, students: item.students + 1 } : item,
+        item.id === classroom.id 
+          ? { ...item, students: item.students + 1, enrolledStudentIds: currentUser ? [...item.enrolledStudentIds, currentUser.id] : item.enrolledStudentIds } 
+          : item,
       ),
       notifications: [
         {

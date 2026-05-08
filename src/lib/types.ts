@@ -51,6 +51,7 @@ export interface Classroom {
   sections: ClassroomSection[];
   resourceCount: number;
   unreadMessages: number;
+  enrolledStudentIds: string[];
 }
 
 export interface Assignment {

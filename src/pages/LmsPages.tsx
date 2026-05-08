@@ -644,8 +644,8 @@ export function ClassesPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <ShellSection title="Create class" subtitle="Teachers and admins can spin up a class in seconds.">
-          {canManageClasses ? (
+        {canManageClasses && (
+          <ShellSection title="Create class" subtitle="Teachers and admins can spin up a class in seconds.">
             <form className="space-y-4" onSubmit={onSubmit}>
               <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Class title" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
               <input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="Subject" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
@@ -656,12 +656,8 @@ export function ClassesPage() {
                 Create classroom
               </button>
             </form>
-          ) : (
-            <div className="rounded-3xl border border-border-subtle bg-black/10 p-5 text-sm text-text-secondary">
-              Students can join classes by code, but only teachers and admins can create or archive them.
-            </div>
-          )}
-        </ShellSection>
+          </ShellSection>
+        )}
 
         <div className="space-y-6">
           <ShellSection title="Join class" subtitle="Enter a class code to join instantly.">

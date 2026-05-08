@@ -82,6 +82,7 @@ export const seededClasses: Classroom[] = [
     ],
     resourceCount: 18,
     unreadMessages: 4,
+    enrolledStudentIds: [],
   },
   {
     id: 'class-frontend',
@@ -105,6 +106,7 @@ export const seededClasses: Classroom[] = [
     ],
     resourceCount: 24,
     unreadMessages: 2,
+    enrolledStudentIds: [],
   },
   {
     id: 'class-ops',
@@ -128,6 +130,7 @@ export const seededClasses: Classroom[] = [
     ],
     resourceCount: 11,
     unreadMessages: 0,
+    enrolledStudentIds: [],
   },
 ];
 
