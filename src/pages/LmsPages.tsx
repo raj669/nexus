@@ -2922,6 +2922,529 @@ export function ClassDetailPage() {
   );
 }
 
+export function GradingPage() {
+  const { state, currentRole, gradeSubmission } = useLms();
+  const navigate = useNavigate();
+
+  const [selectedClassId, setSelectedClassId] = useState('all');
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'graded'>('all');
+  const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
+
+  if (currentRole !== 'teacher' && currentRole !== 'admin') {
+    return <NotFoundPage />;
+  }
+
+  const myClasses = state.classes.filter((c) => !c.archived);
+
+  const assignmentsForClass =
+    selectedClassId === 'all'
+      ? state.assignments
+      : state.assignments.filter((a) => a.classId === selectedClassId);
+
+  const filteredSubmissions = useMemo(() => {
+    return state.submissions.filter((sub) => {
+      const assignment = state.assignments.find((a) => a.id === sub.assignmentId);
+      if (!assignment) return false;
+      if (selectedClassId !== 'all' && assignment.classId !== selectedClassId) return false;
+      if (selectedAssignmentId !== 'all' && sub.assignmentId !== selectedAssignmentId) return false;
+      if (statusFilter === 'pending' && sub.score !== undefined) return false;
+      if (statusFilter === 'graded' && sub.score === undefined) return false;
+      return true;
+    });
+  }, [state.submissions, state.assignments, selectedClassId, selectedAssignmentId, statusFilter]);
+
+  const activeSubmission = activeSubmissionId
+    ? filteredSubmissions.find((s) => s.id === activeSubmissionId) ?? filteredSubmissions[0]
+    : filteredSubmissions[0];
+
+  const activeIndex = activeSubmission ? filteredSubmissions.findIndex((s) => s.id === activeSubmission.id) : -1;
+
+  const totalCount = state.submissions.length;
+  const pendingCount = state.submissions.filter((s) => s.score === undefined).length;
+  const gradedCount = state.submissions.filter((s) => s.score !== undefined).length;
+  const gradeRate = totalCount ? Math.round((gradedCount / totalCount) * 100) : 0;
+
+  const handleGrade = async (submissionId: string, score: number, feedback: string) => {
+    try {
+      await api.gradeSubmission(submissionId, score, feedback);
+      gradeSubmission(submissionId, score, feedback);
+      const idx = filteredSubmissions.findIndex((s) => s.id === submissionId);
+      const next = filteredSubmissions.slice(idx + 1).find((s) => s.score === undefined);
+      if (next) setActiveSubmissionId(next.id);
+    } catch (err) {
+      console.error('Grade failed:', err);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Grade Center</p>
+          <h1 className="mt-2 text-3xl font-semibold text-text-primary">SpeedGrader — Review &amp; return student work</h1>
+        </div>
+        <ViewPill label={currentRole === 'admin' ? 'Admin view' : 'Teacher controls'} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Submitted" value={totalCount} note="All assignments" icon={ClipboardCheck} accent="bg-blue-500" />
+        <StatCard title="Pending Review" value={pendingCount} note="Awaiting your grade" icon={Clock3} accent="bg-amber-500" />
+        <StatCard title="Graded" value={gradedCount} note="Feedback returned" icon={CheckCircle2} accent="bg-emerald-500" />
+        <StatCard title="Grade Rate" value={`${gradeRate}%`} note="Completion progress" icon={Target} accent="bg-purple-500" />
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <select
+          value={selectedClassId}
+          onChange={(e) => { setSelectedClassId(e.target.value); setSelectedAssignmentId('all'); setActiveSubmissionId(null); }}
+          className="rounded-2xl border border-border-subtle bg-white/5 px-4 py-2.5 text-sm text-text-primary outline-none focus:border-primary/60"
+        >
+          <option value="all">All classes</option>
+          {myClasses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+        </select>
+        <select
+          value={selectedAssignmentId}
+          onChange={(e) => { setSelectedAssignmentId(e.target.value); setActiveSubmissionId(null); }}
+          className="rounded-2xl border border-border-subtle bg-white/5 px-4 py-2.5 text-sm text-text-primary outline-none focus:border-primary/60"
+        >
+          <option value="all">All assignments</option>
+          {assignmentsForClass.map((a) => <option key={a.id} value={a.id}>{a.title}</option>)}
+        </select>
+        <div className="flex overflow-hidden rounded-2xl border border-border-subtle">
+          {(['all', 'pending', 'graded'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => { setStatusFilter(s); setActiveSubmissionId(null); }}
+              className={`px-5 py-2.5 text-sm font-medium transition ${statusFilter === s ? 'bg-primary text-white' : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'}`}
+            >
+              {s === 'all' ? 'All' : s === 'pending' ? 'Pending' : 'Graded'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {totalCount === 0 ? (
+        <div className="rounded-[2rem] border border-border-subtle bg-white/5 p-16 text-center">
+          <GraduationCap className="mx-auto h-12 w-12 text-text-muted" />
+          <p className="mt-4 text-lg font-semibold text-text-primary">No submissions yet</p>
+          <p className="mt-2 text-sm text-text-secondary">Student submissions will appear here once they submit their work.</p>
+          <button
+            type="button"
+            onClick={() => navigate('/app/assignments')}
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+          >
+            <Plus className="h-4 w-4" />
+            Create an assignment
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
+          {/* Submission roster */}
+          <div className={metricClass + ' !p-0 flex flex-col overflow-hidden'}>
+            <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
+              <div>
+                <h2 className="font-semibold text-text-primary">Submissions</h2>
+                <p className="mt-0.5 text-xs text-text-muted">{filteredSubmissions.length} shown</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="text-xs text-text-muted">{filteredSubmissions.filter((s) => s.score !== undefined).length} graded</span>
+              </div>
+            </div>
+
+            {filteredSubmissions.length > 0 && (
+              <div className="border-b border-border-subtle px-5 py-3">
+                <div className="mb-1 flex items-center justify-between text-xs text-text-muted">
+                  <span>Grading progress</span>
+                  <span>{filteredSubmissions.filter((s) => s.score !== undefined).length}/{filteredSubmissions.length}</span>
+                </div>
+                <ProgressBar value={filteredSubmissions.length ? (filteredSubmissions.filter((s) => s.score !== undefined).length / filteredSubmissions.length) * 100 : 0} />
+              </div>
+            )}
+
+            <div className="flex-1 divide-y divide-border-subtle overflow-y-auto" style={{ maxHeight: 'calc(100vh - 460px)', minHeight: '200px' }}>
+              {filteredSubmissions.length === 0 ? (
+                <div className="p-8 text-center text-sm text-text-secondary">No submissions match your filters.</div>
+              ) : (
+                filteredSubmissions.map((sub) => {
+                  const assignment = state.assignments.find((a) => a.id === sub.assignmentId);
+                  const student = state.users.find((u) => u.id === sub.studentId);
+                  const isActive = sub.id === activeSubmission?.id;
+                  const isGraded = sub.score !== undefined;
+                  const pct = isGraded && assignment?.maxPoints ? Math.round((sub.score! / assignment.maxPoints) * 100) : null;
+
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => setActiveSubmissionId(sub.id)}
+                      className={`w-full border-l-[3px] px-4 py-3.5 text-left transition ${isActive ? 'border-l-primary bg-primary/15' : 'border-l-transparent hover:bg-white/[0.04]'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="relative shrink-0">
+                          <img src={student?.avatar} alt={student?.name} className="h-10 w-10 rounded-xl object-cover" />
+                          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--panel)] ${isGraded ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-text-primary">{student?.name ?? 'Student'}</p>
+                          <p className="truncate text-xs text-text-secondary">{assignment?.title ?? 'Assignment'}</p>
+                          <p className="text-xs text-text-muted">{new Date(sub.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          {isGraded ? (
+                            <span className={`text-sm font-bold ${pct! >= 80 ? 'text-emerald-400' : pct! >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
+                              {sub.score}/{assignment?.maxPoints}
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-400">Pending</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Grading panel */}
+          {activeSubmission ? (
+            <GradingPanel
+              key={activeSubmission.id}
+              submission={activeSubmission}
+              assignment={state.assignments.find((a) => a.id === activeSubmission.assignmentId)!}
+              student={state.users.find((u) => u.id === activeSubmission.studentId)}
+              classroom={(() => {
+                const a = state.assignments.find((x) => x.id === activeSubmission.assignmentId);
+                return state.classes.find((c) => c.id === a?.classId);
+              })()}
+              onGrade={handleGrade}
+              currentIndex={activeIndex + 1}
+              totalCount={filteredSubmissions.length}
+              onPrev={() => { if (activeIndex > 0) setActiveSubmissionId(filteredSubmissions[activeIndex - 1].id); }}
+              onNext={() => { if (activeIndex < filteredSubmissions.length - 1) setActiveSubmissionId(filteredSubmissions[activeIndex + 1].id); }}
+            />
+          ) : (
+            <div className={metricClass + ' flex min-h-[200px] items-center justify-center'}>
+              <p className="text-sm text-text-muted">Select a submission from the list to grade.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GradingPanel({
+  submission,
+  assignment,
+  student,
+  classroom,
+  onGrade,
+  currentIndex,
+  totalCount,
+  onPrev,
+  onNext,
+}: {
+  submission: StudentSubmission;
+  assignment: Assignment;
+  student: UserAccount | undefined;
+  classroom: Classroom | undefined;
+  onGrade: (id: string, score: number, feedback: string) => Promise<void>;
+  currentIndex: number;
+  totalCount: number;
+  onPrev: () => void;
+  onNext: () => void;
+  key?: string | number;
+}) {
+  const [score, setScore] = useState(submission.score !== undefined ? String(submission.score) : '');
+  const [feedback, setFeedback] = useState(submission.teacherFeedback ?? '');
+  const [checkedRubric, setCheckedRubric] = useState<Set<number>>(new Set());
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(submission.score !== undefined);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+
+  useEffect(() => {
+    setScore(submission.score !== undefined ? String(submission.score) : '');
+    setFeedback(submission.teacherFeedback ?? '');
+    setCheckedRubric(new Set());
+    setSaved(submission.score !== undefined);
+    setAiSuggestion(null);
+  }, [submission.id]);
+
+  const numScore = Number(score);
+  const pct = score && !isNaN(numScore) && assignment.maxPoints ? Math.round((numScore / assignment.maxPoints) * 100) : null;
+  const letterGrade = pct === null ? '—' : pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+  const gradeColor = pct === null ? 'text-text-muted' : pct >= 80 ? 'text-emerald-400' : pct >= 70 ? 'text-amber-300' : pct >= 60 ? 'text-amber-500' : 'text-red-400';
+  const gradeBg = pct === null ? 'border-border-subtle bg-black/20' : pct >= 80 ? 'border-emerald-500/20 bg-emerald-500/10' : pct >= 60 ? 'border-amber-500/20 bg-amber-500/10' : 'border-red-500/20 bg-red-500/10';
+
+  const submittedDate = new Date(submission.submittedAt).toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+  });
+  const isLate = !!(assignment.dueDate && new Date(submission.submittedAt) > new Date(assignment.dueDate));
+
+  const handleSave = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!score || isNaN(numScore)) return;
+    setSaving(true);
+    await onGrade(submission.id, numScore, feedback);
+    setSaved(true);
+    setSaving(false);
+  };
+
+  const handleAiFeedback = async () => {
+    setAiLoading(true);
+    try {
+      const res = await api.getAssignmentFeedback(submission.notes || submission.fileName, assignment.rubric);
+      const parts = [
+        res.strengths?.length ? `Strengths: ${res.strengths.join(' ')}` : '',
+        res.concerns?.length ? `Areas to improve: ${res.concerns.join(' ')}` : '',
+        res.nextSteps?.length ? `Next steps: ${res.nextSteps.join(' ')}` : '',
+      ].filter(Boolean).join('\n\n');
+      setAiSuggestion(parts);
+      if (!feedback) {
+        setFeedback(parts);
+        setSaved(false);
+      }
+      if (!score && res.score) {
+        setScore(String(Math.round((res.score / 100) * assignment.maxPoints)));
+        setSaved(false);
+      }
+    } catch {
+      setAiSuggestion('AI feedback unavailable — write your own below.');
+    }
+    setAiLoading(false);
+  };
+
+  const toggleRubric = (idx: number) => {
+    const next = new Set(checkedRubric);
+    if (next.has(idx)) next.delete(idx); else next.add(idx);
+    setCheckedRubric(next);
+  };
+
+  return (
+    <div className={metricClass}>
+      {/* Navigation bar */}
+      <div className="mb-6 flex items-center justify-between gap-4 border-b border-border-subtle pb-5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={currentIndex <= 1}
+            className="rounded-xl border border-border-subtle p-2 transition hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronLeft className="h-4 w-4 text-text-secondary" />
+          </button>
+          <span className="min-w-[5rem] text-center text-sm text-text-muted">{currentIndex} of {totalCount}</span>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={currentIndex >= totalCount}
+            className="rounded-xl border border-border-subtle p-2 transition hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronRight className="h-4 w-4 text-text-secondary" />
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ViewPill label={assignment.kind} />
+          {saved ? (
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">✓ Graded</span>
+          ) : (
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">Needs grading</span>
+          )}
+          {isLate && (
+            <span className="rounded-full border border-red-500/30 bg-red-500/15 px-3 py-1 text-xs font-semibold text-red-400">⚠ Late</span>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+        {/* Left: submission details */}
+        <div className="space-y-5">
+          {/* Student header */}
+          <div className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-white/5 p-4">
+            <img src={student?.avatar} alt={student?.name} className="h-14 w-14 rounded-2xl object-cover" />
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-semibold text-text-primary">{student?.name ?? 'Student'}</p>
+              <p className="truncate text-sm text-text-secondary">{student?.email}</p>
+              <p className="mt-1 text-xs text-text-muted">{classroom?.title}{classroom?.subject ? ` · ${classroom.subject}` : ''}</p>
+            </div>
+          </div>
+
+          {/* Assignment info */}
+          <div className="space-y-3 rounded-2xl border border-border-subtle bg-white/5 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Assignment</p>
+                <p className="mt-1 text-base font-semibold text-text-primary">{assignment.title}</p>
+                {assignment.description && <p className="mt-1 text-sm text-text-secondary">{assignment.description}</p>}
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-xs text-text-muted">Max points</p>
+                <p className="text-xl font-bold text-text-primary">{assignment.maxPoints}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-4 border-t border-border-subtle pt-3">
+              {assignment.dueDate && (
+                <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  Due {assignment.dueDate}
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Submitted {submittedDate}
+              </div>
+            </div>
+          </div>
+
+          {/* Submitted file + notes */}
+          <div className="space-y-3 rounded-2xl border border-border-subtle bg-black/20 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Submitted Work</p>
+            <a
+              href={submission.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary/20"
+            >
+              <FolderOpen className="h-4 w-4" />
+              {submission.fileName || 'View submission'}
+            </a>
+            {submission.notes && (
+              <div className="rounded-xl border border-border-subtle bg-white/5 px-4 py-3">
+                <p className="text-xs text-text-muted">Student notes</p>
+                <p className="mt-1 text-sm italic text-text-secondary">"{submission.notes}"</p>
+              </div>
+            )}
+          </div>
+
+          {/* Rubric checklist */}
+          {assignment.rubric.length > 0 && (
+            <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Rubric Checklist</p>
+                <span className="text-xs font-semibold text-text-secondary">{checkedRubric.size}/{assignment.rubric.length} met</span>
+              </div>
+              <div className="space-y-1">
+                {assignment.rubric.map((item, idx) => (
+                  <label key={idx} className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-2.5 transition hover:bg-white/5">
+                    <input
+                      type="checkbox"
+                      checked={checkedRubric.has(idx)}
+                      onChange={() => toggleRubric(idx)}
+                      className="mt-0.5 h-4 w-4 accent-primary"
+                    />
+                    <span className={`text-sm transition-all ${checkedRubric.has(idx) ? 'text-text-muted line-through' : 'text-text-secondary'}`}>{item}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="mt-3 border-t border-border-subtle pt-3">
+                <ProgressBar value={assignment.rubric.length ? (checkedRubric.size / assignment.rubric.length) * 100 : 0} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right: grading controls */}
+        <div className="space-y-5">
+          {/* Grade display */}
+          <div className={`rounded-2xl border p-5 text-center transition-all ${gradeBg}`}>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-muted">Grade</p>
+            <p className={`mt-2 text-7xl font-bold tracking-tight ${gradeColor}`}>{letterGrade}</p>
+            {pct !== null ? (
+              <p className="mt-2 text-sm text-text-secondary">{numScore} / {assignment.maxPoints} · {pct}%</p>
+            ) : (
+              <p className="mt-2 text-sm text-text-muted">Enter a score below</p>
+            )}
+          </div>
+
+          {/* Grade form */}
+          <form className="space-y-4" onSubmit={handleSave}>
+            <div>
+              <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-text-muted">
+                Score (0 – {assignment.maxPoints})
+              </label>
+              <input
+                type="range"
+                min="0"
+                max={assignment.maxPoints}
+                value={score || 0}
+                onChange={(e) => { setScore(e.target.value); setSaved(false); }}
+                className="mb-2 w-full accent-primary"
+              />
+              <input
+                type="number"
+                min="0"
+                max={assignment.maxPoints}
+                value={score}
+                onChange={(e) => { setScore(e.target.value); setSaved(false); }}
+                placeholder={`0 – ${assignment.maxPoints}`}
+                className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-center text-lg font-bold text-text-primary outline-none focus:border-primary/60"
+              />
+            </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="text-xs uppercase tracking-[0.2em] text-text-muted">Teacher Feedback</label>
+                <button
+                  type="button"
+                  onClick={handleAiFeedback}
+                  disabled={aiLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary/20 disabled:opacity-50"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  {aiLoading ? 'Generating…' : 'AI assist'}
+                </button>
+              </div>
+              {aiSuggestion && (
+                <div className="mb-2 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-text-secondary">
+                  <p className="mb-1.5 font-semibold text-primary">AI suggestion</p>
+                  <p className="leading-relaxed whitespace-pre-line">{aiSuggestion}</p>
+                  {feedback !== aiSuggestion && (
+                    <button
+                      type="button"
+                      onClick={() => { setFeedback(aiSuggestion); setSaved(false); }}
+                      className="mt-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition hover:bg-primary/20"
+                    >
+                      Apply to feedback
+                    </button>
+                  )}
+                </div>
+              )}
+              <textarea
+                value={feedback}
+                onChange={(e) => { setFeedback(e.target.value); setSaved(false); }}
+                rows={7}
+                placeholder="Write specific feedback — highlight strengths, point out areas for improvement, and suggest next steps..."
+                className="w-full resize-none rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-sm text-text-primary leading-relaxed outline-none focus:border-primary/60"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={saving || !score}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3.5 font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <CheckCircle2 className="h-5 w-5" />
+              {saving ? 'Saving grade…' : saved ? 'Update grade' : 'Save & return grade'}
+            </button>
+
+            {saved && (
+              <div className="flex items-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                Grade saved — student can now view their score and feedback.
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function NotFoundPage() {
   return (
     <div className="rounded-[2rem] border border-border-subtle bg-white/5 p-10 text-center">

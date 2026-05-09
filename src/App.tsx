@@ -10,6 +10,7 @@ import {
   CollaborationPage,
   DashboardPage,
   AdminPage,
+  GradingPage,
   LoginPage,
   NotFoundPage,
   ResourcesPage,
@@ -68,6 +69,9 @@ export default function App() {
               <Route path="classes" element={<ClassesPage />} />
               <Route path="classes/:classId" element={<ClassDetailPage />} />
               <Route path="assignments" element={<AssignmentsPage />} />
+              <Route element={<RoleGate allow={['teacher', 'admin']} />}>
+                <Route path="grading" element={<GradingPage />} />
+              </Route>
               <Route path="collaboration" element={<CollaborationPage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="resources" element={<ResourcesPage />} />

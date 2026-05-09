@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Users,
   Trophy,
+  PenLine,
 } from 'lucide-react';
 import { useLms } from '../../context/LmsContext';
 
@@ -30,7 +31,8 @@ const studentNavItems = [
 const teacherNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
   { icon: GraduationCap, label: 'My Classes', path: '/app/classes' },
-  { icon: ClipboardList, label: 'Grade Center', path: '/app/assignments' },
+  { icon: ClipboardList, label: 'Assignments', path: '/app/assignments' },
+  { icon: PenLine, label: 'SpeedGrader', path: '/app/grading' },
   { icon: Calendar, label: 'Schedule', path: '/app/calendar' },
   { icon: FolderOpen, label: 'Resources', path: '/app/resources' },
   { icon: BarChart3, label: 'Class Analytics', path: '/app/analytics' },

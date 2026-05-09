@@ -181,4 +181,13 @@ export const api = {
       body: JSON.stringify({ score, feedback }),
       headers: authHeaders(),
     }),
+  getAssignmentFeedback: (submissionText: string, rubric: string[]) =>
+    request<{ title: string; score: number; strengths: string[]; concerns: string[]; nextSteps: string[] }>(
+      '/ai/assignment-feedback',
+      {
+        method: 'POST',
+        body: JSON.stringify({ submissionText, rubric }),
+        headers: authHeaders(),
+      },
+    ),
 };

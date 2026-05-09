@@ -413,6 +413,46 @@
   ],
   "analyticsEvents": [
     {
+      "id": "event-c52ae56a-ca11-4a54-884c-729655013da2",
+      "userId": "user-admin",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "admin"
+      },
+      "createdAt": "2026-05-09T07:35:27.324Z"
+    },
+    {
+      "id": "event-e06c02cd-59e2-41eb-896a-12795e62fca5",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-09T07:34:14.530Z"
+    },
+    {
+      "id": "event-1cfbdcf5-7a4f-4bda-86ee-16b4382e1d93",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-09T07:32:43.444Z"
+    },
+    {
+      "id": "event-6cd736d2-6822-4f03-99c1-c8eb4e7ed44e",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-09T07:22:33.259Z"
+    },
+    {
       "id": "event-a5d2138e-4565-427d-9a39-5e5cf17d0adc",
       "userId": "user-student",
       "type": "auth",
@@ -597,25 +637,25 @@
   ],
   "sessions": [
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODMxMDkzODMzMywiZXhwIjoxNzc4MzM5NzM4MzMzLCJqdGkiOiIzOTc4NzU2NS02MmJjLTQyMTktYmFlOC1mNWY3MDBlZDljZTgifQ._w67YDXCtlYLjurncOTkW_TWWGIJhGKHqB3uqj-4xjQ",
-      "userId": "user-student",
-      "role": "student",
-      "issuedAt": 1778310938334,
-      "expiresAt": 1778339738333
-    },
-    {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODMxMDkwNjE1OSwiZXhwIjoxNzc4MzM5NzA2MTU5LCJqdGkiOiIyYjRhY2VlNS1jNzdjLTQ1OTAtODU5Mi0yMDMyY2IyNTM4NWQifQ.AaUW5Qpnm9vinwqb6JmpNTHzbkkUkdY23NfztWFKkDI",
-      "userId": "user-teacher",
-      "role": "teacher",
-      "issuedAt": 1778310906160,
-      "expiresAt": 1778339706159
-    },
-    {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc4MjU1MjczNjMzLCJleHAiOjE3NzgyODQwNzM2MzMsImp0aSI6IjQzMTJkZDk3LTQyMjctNDMxNi1hZmE0LWIxYTIwNDk2MmQ0YiJ9.LlRGN-Ybpg9F4GQR2qo6sgg0HENFfARpXJOIi-iNQuw",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc4MzEyMTI3MzIwLCJleHAiOjE3NzgzNDA5MjczMjAsImp0aSI6IjU3MmZjNTU5LTI3OGItNGE4Yy1hMjAwLThmZDZlNjkyMzlmYiJ9.5p3zk9Em53fAnpbBydmvYw1P9XwucoNnsjes0Dv4qnc",
       "userId": "user-admin",
       "role": "admin",
-      "issuedAt": 1778255273633,
-      "expiresAt": 1778284073633
+      "issuedAt": 1778312127320,
+      "expiresAt": 1778340927320
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODMxMjA1NDUyNiwiZXhwIjoxNzc4MzQwODU0NTI2LCJqdGkiOiIyMjlkZDcxNi1kMTE5LTQwMzMtOTk2Yi0xNDY1ZDM1YjgwZTAifQ.Bu01eVvGmI947R-5RCQYC50i-X6DcOsDOwKb7V0nmpk",
+      "userId": "user-teacher",
+      "role": "teacher",
+      "issuedAt": 1778312054526,
+      "expiresAt": 1778340854526
+    },
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODMxMTk2MzQ0MSwiZXhwIjoxNzc4MzQwNzYzNDQxLCJqdGkiOiI5YmRhMTZjNS0zY2M0LTQ2OTctODE1Zi0wYWM0OGI1ZmFhMGQifQ.uiX_jcjmZUV0KGsNx-FtQ333guk6fqlZKb2VeYyLh10",
+      "userId": "user-student",
+      "role": "student",
+      "issuedAt": 1778311963441,
+      "expiresAt": 1778340763441
     }
   ],
   "goals": [
