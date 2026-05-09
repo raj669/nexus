@@ -1,34 +1,75 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  BookOpen,
   MessageSquare,
-  Settings, 
+  Settings,
   LogOut,
   Calendar,
   Shield,
   FolderOpen,
-  ClipboardCheck,
-  PanelsTopLeft,
+  ClipboardList,
+  BarChart3,
+  GraduationCap,
+  Users,
+  Trophy,
 } from 'lucide-react';
 import { useLms } from '../../context/LmsContext';
 
-const baseNavItems = [
+const studentNavItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
-  { icon: BookOpen, label: 'Classes', path: '/app/classes' },
-  { icon: ClipboardCheck, label: 'Assignments', path: '/app/assignments' },
-  { icon: MessageSquare, label: 'Collaboration', path: '/app/collaboration' },
+  { icon: BookOpen, label: 'My Courses', path: '/app/classes' },
+  { icon: ClipboardList, label: 'Assignments', path: '/app/assignments' },
+  { icon: Trophy, label: 'My Grades', path: '/app/analytics' },
   { icon: Calendar, label: 'Calendar', path: '/app/calendar' },
   { icon: FolderOpen, label: 'Resources', path: '/app/resources' },
-  { icon: PanelsTopLeft, label: 'Analytics', path: '/app/analytics' },
+  { icon: MessageSquare, label: 'Discussions', path: '/app/collaboration' },
   { icon: Settings, label: 'Settings', path: '/app/settings' },
 ];
 
-const adminItem = { icon: Shield, label: 'Admin', path: '/app/admin' };
+const teacherNavItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
+  { icon: GraduationCap, label: 'My Classes', path: '/app/classes' },
+  { icon: ClipboardList, label: 'Grade Center', path: '/app/assignments' },
+  { icon: Calendar, label: 'Schedule', path: '/app/calendar' },
+  { icon: FolderOpen, label: 'Resources', path: '/app/resources' },
+  { icon: BarChart3, label: 'Class Analytics', path: '/app/analytics' },
+  { icon: MessageSquare, label: 'Discussions', path: '/app/collaboration' },
+  { icon: Settings, label: 'Settings', path: '/app/settings' },
+];
+
+const adminNavItems = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/app' },
+  { icon: Users, label: 'User Management', path: '/app/admin' },
+  { icon: BarChart3, label: 'Platform Analytics', path: '/app/analytics' },
+  { icon: BookOpen, label: 'All Classes', path: '/app/classes' },
+  { icon: ClipboardList, label: 'Assignments', path: '/app/assignments' },
+  { icon: Calendar, label: 'Calendar', path: '/app/calendar' },
+  { icon: Shield, label: 'System Settings', path: '/app/settings' },
+];
+
+const roleBadgeColors: Record<string, string> = {
+  student: 'bg-blue-500/20 text-blue-300',
+  teacher: 'bg-emerald-500/20 text-emerald-300',
+  admin: 'bg-purple-500/20 text-purple-300',
+};
 
 export default function Sidebar() {
   const { currentUser, state, toggleSidebar, signOut } = useLms();
-  const navItems = currentUser?.role === 'admin' ? [...baseNavItems, adminItem] : baseNavItems;
+
+  const navItems =
+    currentUser?.role === 'admin'
+      ? adminNavItems
+      : currentUser?.role === 'teacher'
+        ? teacherNavItems
+        : studentNavItems;
+
+  const roleLabel =
+    currentUser?.role === 'admin'
+      ? 'Administrator'
+      : currentUser?.role === 'teacher'
+        ? 'Educator'
+        : 'Student';
 
   return (
     <aside
@@ -41,8 +82,8 @@ export default function Sidebar() {
             <span className="material-symbols-outlined text-2xl">rocket_launch</span>
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-text-primary">Nexus</h1>
-            <p className="text-xs uppercase tracking-[0.28em] text-text-muted">Next-gen LMS</p>
+            <h1 className="text-xl font-semibold tracking-tight text-text-primary">UniPlanner</h1>
+            <p className="text-xs uppercase tracking-[0.28em] text-text-muted">Next-gen planner</p>
           </div>
         </div>
         <button type="button" onClick={toggleSidebar} className="rounded-full border border-border-subtle p-2 text-text-secondary transition hover:border-primary/40 hover:text-text-primary lg:hidden">
@@ -53,9 +94,12 @@ export default function Sidebar() {
       <div className="border-b border-border-subtle px-6 py-5">
         <div className="flex items-center gap-3 rounded-3xl border border-border-subtle bg-white/5 p-3">
           <img src={currentUser?.avatar} alt={currentUser?.name ?? 'User'} className="h-12 w-12 rounded-2xl object-cover" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-text-primary">{currentUser?.name}</p>
             <p className="truncate text-xs text-text-secondary">{currentUser?.title}</p>
+            <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${roleBadgeColors[currentUser?.role ?? 'student']}`}>
+              {roleLabel}
+            </span>
           </div>
         </div>
       </div>
@@ -65,11 +109,12 @@ export default function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === '/app'}
             onClick={() => state.preferences.sidebarOpen && toggleSidebar()}
             className={({ isActive }) => `
               flex items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-200 group
-              ${isActive 
-                ? 'border border-primary/20 bg-primary/15 text-primary' 
+              ${isActive
+                ? 'border border-primary/20 bg-primary/15 text-primary'
                 : 'text-text-secondary hover:bg-white/[0.06] hover:text-text-primary'
               }
             `}

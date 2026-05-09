@@ -99,9 +99,9 @@ function ClipboardCheck(props: { className?: string }) {
 const widgetOrderMap = ['progress', 'classes', 'assignments', 'activity', 'assistant', 'calendar'];
 
 const quickAccounts = [
-  { role: 'student' as const, email: 'alex@nexus.dev' },
-  { role: 'teacher' as const, email: 'sarah@nexus.dev' },
-  { role: 'admin' as const, email: 'admin@nexus.dev' },
+  { role: 'student' as const, email: 'alex@uniplanner.dev' },
+  { role: 'teacher' as const, email: 'sarah@uniplanner.dev' },
+  { role: 'admin' as const, email: 'admin@uniplanner.dev' },
 ];
 
 const metricClass = 'rounded-3xl border border-border-subtle bg-[var(--panel)] p-5 shadow-[0_20px_80px_rgba(15,23,42,0.18)]';
@@ -157,7 +157,7 @@ function getClassColor(classroom: Classroom) {
 export function LoginPage() {
   const navigate = useNavigate();
   const { signIn } = useLms();
-  const [email, setEmail] = useState('alex@nexus.dev');
+  const [email, setEmail] = useState('alex@uniplanner.dev');
   const [password, setPassword] = useState('classroom123!');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -186,7 +186,7 @@ export function LoginPage() {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-text-secondary">
                 <Sparkles className="h-4 w-4 text-accent" />
-                Nexus LMS for modern classrooms
+                UniPlanner for modern classrooms
               </div>
               <div className="space-y-4 max-w-2xl">
                 <h1 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl">
@@ -242,7 +242,7 @@ export function LoginPage() {
             <form className="space-y-5" onSubmit={onSubmit}>
               <div>
                 <label className="mb-2 block text-sm font-medium text-text-secondary" htmlFor="email">Email</label>
-                <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-text-primary outline-none transition focus:border-primary/60" placeholder="alex@nexus.dev" />
+                <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-text-primary outline-none transition focus:border-primary/60" placeholder="alex@uniplanner.dev" />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-text-secondary" htmlFor="password">Password</label>
@@ -289,296 +289,665 @@ export function LoginPage() {
 }
 
 export function DashboardPage() {
-  const { currentUser } = useLms();
-  const [snapshot, setSnapshot] = useState<DashboardStateResponse | null>(null);
-  const [overview, setOverview] = useState<AnalyticsOverviewResponse | null>(null);
-  const [draggedWidget, setDraggedWidget] = useState<string | null>(null);
-  const [widgetOrder, setWidgetOrder] = useState<string[]>(widgetOrderMap);
-  const [error, setError] = useState('');
+  const { currentRole } = useLms();
+  if (currentRole === 'teacher') return <TeacherDashboard />;
+  if (currentRole === 'admin') return <AdminDashboard />;
+  return <StudentDashboard />;
+}
 
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      try {
-        const [stateResponse, overviewResponse] = await Promise.all([
-          api.state(),
-          api.analyticsOverview(),
-        ]);
-
-        if (!active) {
-          return;
-        }
-
-        setSnapshot(stateResponse);
-        setOverview(overviewResponse);
-        setWidgetOrder(stateResponse.app.preferences.widgetOrder.length ? stateResponse.app.preferences.widgetOrder : widgetOrderMap);
-        setError('');
-      } catch (loadError) {
-        if (!active) {
-          return;
-        }
-
-        setError(loadError instanceof Error ? loadError.message : 'Failed to load dashboard data.');
-      }
-    };
-
-    void load();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const app = snapshot?.app;
-  const currentSnapshotUser = app?.users.find((user) => user.id === snapshot?.session?.userId) ?? currentUser;
-  const analytics = overview?.analytics ?? analyticsByRole[(snapshot?.session?.role ?? currentSnapshotUser?.role ?? 'student') as keyof typeof analyticsByRole];
-  const classes = app?.classes.filter((item) => !item.archived).slice(0, 4) ?? [];
-  const assignments = app?.assignments.slice(0, 4) ?? [];
-  const notifications = app?.notifications.slice(0, 4) ?? [];
-
-  const orderedWidgets = widgetOrder
-    .map((type) => ({ type, meta: widgetMeta[type as keyof typeof widgetMeta] }))
-    .filter((item) => item.meta);
-
-  const moveWidget = (from: number, to: number) => {
-    setWidgetOrder((previous) => {
-      if (to < 0 || to >= previous.length) {
-        return previous;
-      }
-
-      const next = [...previous];
-      const [item] = next.splice(from, 1);
-      next.splice(to, 0, item);
-      void api.updateWidgetOrder(next).catch(() => setWidgetOrder(previous));
-      return next;
-    });
-  };
-
-  if (error) {
-    return (
-      <div className="rounded-3xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-200">
-        {error}
-      </div>
-    );
-  }
+function StudentDashboard() {
+  const navigate = useNavigate();
+  const { currentUser, state } = useLms();
+  const analytics = analyticsByRole['student'];
+  const pendingAssignments = state.assignments.filter((a) => a.status === 'assigned' || a.status === 'draft').slice(0, 4);
+  const activeCourses = state.classes.filter((c) => !c.archived).slice(0, 3);
+  const upcomingEvents = state.events.filter((e) => e.type === 'deadline' || e.type === 'exam').slice(0, 4);
+  const unreadNotifications = state.notifications.filter((n) => n.unread).slice(0, 3);
+  const gradedWork = state.submissions.filter((s) => s.score !== undefined).slice(0, 3);
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(37,99,235,0.22),rgba(124,58,237,0.12),rgba(15,118,110,0.12))] p-7 shadow-2xl shadow-black/10 sm:p-10">
-        <div className="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs uppercase tracking-[0.32em] text-white/70">
-              <Sparkles className="h-3 w-3 text-accent" />
-              Personalized workspace
+      {/* Hero */}
+      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(37,99,235,0.25),rgba(56,189,248,0.1),rgba(15,118,110,0.08))] p-7 sm:p-10">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-widest text-blue-300">
+              <BookOpen className="h-3 w-3" />
+              Student Portal
             </div>
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Welcome back, {currentSnapshotUser?.name.split(' ')[0] ?? 'Learner'}.
+              Hey, {currentUser?.name.split(' ')[0] ?? 'Student'}!
             </h1>
-            <p className="max-w-2xl text-lg leading-8 text-white/80">
-              {currentSnapshotUser?.role === 'teacher'
-                ? 'Your classrooms are live, grading queues are clear, and learners have fresh feedback waiting.'
-                : currentSnapshotUser?.role === 'admin'
-                  ? 'Platform health is stable. Monitor classes, insights, and security controls from one place.'
-                  : 'Your weekly plan is on track. You have one due assignment, three active discussions, and a full schedule.'}
+            <p className="max-w-xl text-lg text-white/70">
+              You have <span className="font-semibold text-white">{pendingAssignments.length} pending assignment{pendingAssignments.length !== 1 ? 's' : ''}</span> and a <span className="font-semibold text-amber-300">{analytics.streak}-day streak</span> going. Keep it up!
             </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button type="button" onClick={() => navigate('/app/assignments')} className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
+                <ClipboardCheck className="h-4 w-4" />
+                View Assignments
+              </button>
+              <button type="button" onClick={() => navigate('/app/classes')} className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                <BookOpen className="h-4 w-4" />
+                My Courses
+              </button>
+            </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 xl:min-w-[420px]">
-            <StatCard title="Completion" value={`${analytics.completion}%`} note="Across assigned work this week" icon={Target} accent="bg-emerald-500" />
-            <StatCard title="Attendance" value={`${analytics.attendance}%`} note="Live attendance and check-ins" icon={Users} accent="bg-blue-500" />
-            <StatCard title="Streak" value={`${analytics.streak} days`} note="Consistency across study sessions" icon={FlameIcon} accent="bg-amber-500" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-2 xl:min-w-[260px]">
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">GPA</p>
+              <p className="mt-1 text-3xl font-bold text-white">{analytics.averageGrade}%</p>
+              <p className="mt-1 text-xs text-text-secondary">Current avg</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Streak</p>
+              <p className="mt-1 text-3xl font-bold text-amber-400">{analytics.streak}d</p>
+              <p className="mt-1 text-xs text-text-secondary">Days active</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Done</p>
+              <p className="mt-1 text-3xl font-bold text-emerald-400">{analytics.completion}%</p>
+              <p className="mt-1 text-xs text-text-secondary">Completion</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Courses</p>
+              <p className="mt-1 text-3xl font-bold text-blue-400">{activeCourses.length}</p>
+              <p className="mt-1 text-xs text-text-secondary">Enrolled</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-4">
-        {[
-          { title: 'Classes', value: app?.classes.filter((item) => !item.archived).length ?? 0, note: 'Open classrooms and sections', icon: BookOpen, accent: 'bg-primary' },
-          { title: 'Assignments', value: app?.assignments.length ?? 0, note: 'Tracked across quizzes, projects, and essays', icon: ClipboardCheck, accent: 'bg-secondary' },
-          { title: 'Notifications', value: app?.notifications.filter((item) => item.unread).length ?? 0, note: 'Unread priority alerts', icon: BellIcon, accent: 'bg-amber-500' },
-          { title: 'Resources', value: app?.resources.length ?? 0, note: 'Files, folders, and video content', icon: FolderOpen, accent: 'bg-teal-500' },
-        ].map((item) => (
-          <StatCard key={item.title} title={item.title} value={item.value} note={item.note} icon={item.icon} accent={item.accent} />
-        ))}
+      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* Pending assignments */}
+          <ShellSection
+            title="Pending Assignments"
+            subtitle="Work due soon — click an assignment to submit."
+            action={<button type="button" onClick={() => navigate('/app/assignments')} className="text-sm font-medium text-primary hover:underline">View all</button>}
+          >
+            {pendingAssignments.length === 0 ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-center text-sm text-emerald-300">
+                All caught up! No pending assignments.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pendingAssignments.map((a) => {
+                  const cls = state.classes.find((c) => c.id === a.classId);
+                  const urgency = a.dueDate ? 'border-l-amber-400' : 'border-l-border-subtle';
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => navigate('/app/assignments')}
+                      className={`w-full rounded-2xl border border-border-subtle border-l-4 ${urgency} bg-white/5 p-4 text-left transition hover:bg-white/10`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-text-primary">{a.title}</p>
+                          <p className="mt-1 text-sm text-text-secondary">{cls?.title ?? 'Unknown class'} · {a.kind}</p>
+                        </div>
+                        <div className="text-right">
+                          <ViewPill label={a.kind} />
+                          {a.dueDate && <p className="mt-1.5 text-xs text-amber-400 font-medium">Due {a.dueDate}</p>}
+                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-text-muted">
+                        <span>{a.maxPoints} pts</span>
+                        <span className="flex items-center gap-1 text-primary">Submit work →</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </ShellSection>
+
+          {/* My courses */}
+          <ShellSection
+            title="My Enrolled Courses"
+            subtitle="Your current learning progress at a glance."
+            action={<button type="button" onClick={() => navigate('/app/classes')} className="text-sm font-medium text-primary hover:underline">All courses</button>}
+          >
+            <div className="space-y-3">
+              {activeCourses.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => navigate(`/app/classes/${c.id}`)}
+                  className="w-full rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:border-primary/40 hover:bg-white/10"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 h-10 w-10 shrink-0 rounded-xl" style={{ backgroundColor: c.color }} />
+                      <div>
+                        <p className="font-semibold text-text-primary">{c.title}</p>
+                        <p className="text-sm text-text-secondary">{c.subject} · {c.teacherName}</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-white">{c.progress}%</span>
+                  </div>
+                  <div className="mt-3">
+                    <ProgressBar value={c.progress} />
+                  </div>
+                  <p className="mt-2 text-xs text-text-muted">{c.students} students · {c.resourceCount} resources</p>
+                </button>
+              ))}
+            </div>
+          </ShellSection>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Recent grades */}
+          <ShellSection title="Recent Grades" subtitle="Your graded submissions and feedback.">
+            {gradedWork.length === 0 ? (
+              <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">No graded work yet. Submit assignments to get feedback.</p>
+            ) : (
+              <div className="space-y-3">
+                {gradedWork.map((sub) => {
+                  const assignment = state.assignments.find((a) => a.id === sub.assignmentId);
+                  const pct = assignment?.maxPoints ? Math.round((sub.score! / assignment.maxPoints) * 100) : 0;
+                  return (
+                    <div key={sub.id} className="rounded-2xl border border-border-subtle bg-white/5 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-text-primary">{assignment?.title ?? 'Assignment'}</p>
+                          <p className="text-xs text-text-secondary mt-0.5">{sub.fileName}</p>
+                        </div>
+                        <span className={`text-lg font-bold ${pct >= 80 ? 'text-emerald-400' : pct >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
+                          {sub.score}/{assignment?.maxPoints}
+                        </span>
+                      </div>
+                      {sub.teacherFeedback && (
+                        <p className="mt-2 rounded-xl border border-border-subtle bg-black/10 px-3 py-2 text-xs italic text-text-secondary">
+                          "{sub.teacherFeedback}"
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </ShellSection>
+
+          {/* Upcoming deadlines */}
+          <ShellSection title="Upcoming Deadlines" subtitle="Exams and due dates on your calendar.">
+            {upcomingEvents.length === 0 ? (
+              <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">No upcoming deadlines.</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingEvents.map((ev) => (
+                  <button key={ev.id} type="button" onClick={() => navigate('/app/calendar')} className="w-full rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:bg-white/10">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-text-primary">{ev.title}</p>
+                        <p className="text-xs text-text-muted mt-0.5">{ev.date} · {ev.startTime}</p>
+                      </div>
+                      <ViewPill label={ev.type} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </ShellSection>
+
+          {/* Notifications */}
+          <ShellSection title="Notifications" subtitle="Unread alerts from your courses.">
+            <div className="space-y-3">
+              {unreadNotifications.map((n) => (
+                <NotificationCard key={n.id} notification={n} />
+              ))}
+              {unreadNotifications.length === 0 && (
+                <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">You're all caught up.</p>
+              )}
+            </div>
+          </ShellSection>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeacherDashboard() {
+  const navigate = useNavigate();
+  const { currentUser, state, createAssignment } = useLms();
+  const analytics = analyticsByRole['teacher'];
+  const myClasses = state.classes.filter((c) => !c.archived);
+  const pendingSubmissions = state.submissions.filter((s) => s.score === undefined).slice(0, 5);
+  const upcomingClasses = state.events.filter((e) => e.type === 'class').slice(0, 4);
+  const unreadNotifications = state.notifications.filter((n) => n.unread).slice(0, 3);
+  const totalStudents = myClasses.reduce((sum, c) => sum + c.students, 0);
+
+  const [quickTitle, setQuickTitle] = useState('');
+  const [quickClassId, setQuickClassId] = useState(state.classes[0]?.id ?? '');
+  const [quickDue, setQuickDue] = useState('');
+
+  const handleQuickAssignment = (e: FormEvent) => {
+    e.preventDefault();
+    if (!quickTitle.trim()) return;
+    createAssignment({ classId: quickClassId, title: quickTitle, kind: 'assignment', dueDate: quickDue, maxPoints: 100, description: '' });
+    setQuickTitle('');
+    setQuickDue('');
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Hero */}
+      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(16,185,129,0.2),rgba(37,99,235,0.1),rgba(124,58,237,0.08))] p-7 sm:p-10">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs uppercase tracking-widest text-emerald-300">
+              <GraduationCap className="h-3 w-3" />
+              Educator Portal
+            </div>
+            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Welcome, {currentUser?.name.split(' ')[0] ?? 'Teacher'}!
+            </h1>
+            <p className="max-w-xl text-lg text-white/70">
+              You have <span className="font-semibold text-white">{pendingSubmissions.length} submission{pendingSubmissions.length !== 1 ? 's' : ''} to grade</span> and <span className="font-semibold text-emerald-300">{myClasses.length} active class{myClasses.length !== 1 ? 'es' : ''}</span> running.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button type="button" onClick={() => navigate('/app/assignments')} className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:brightness-110">
+                <ClipboardCheck className="h-4 w-4" />
+                Grade Center
+              </button>
+              <button type="button" onClick={() => navigate('/app/classes')} className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                <GraduationCap className="h-4 w-4" />
+                My Classes
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 xl:min-w-[280px]">
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Students</p>
+              <p className="mt-1 text-3xl font-bold text-white">{totalStudents}</p>
+              <p className="mt-1 text-xs text-text-secondary">Across all classes</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">To Grade</p>
+              <p className="mt-1 text-3xl font-bold text-amber-400">{pendingSubmissions.length}</p>
+              <p className="mt-1 text-xs text-text-secondary">Submissions</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Avg Grade</p>
+              <p className="mt-1 text-3xl font-bold text-emerald-400">{analytics.averageGrade}%</p>
+              <p className="mt-1 text-xs text-text-secondary">Class avg</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Completion</p>
+              <p className="mt-1 text-3xl font-bold text-blue-400">{analytics.completion}%</p>
+              <p className="mt-1 text-xs text-text-secondary">Submit rate</p>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <ShellSection
-          title="Custom dashboard widgets"
-          subtitle="Drag cards to reorder your workspace. The layout is persisted for the logged-in account."
-          action={<ViewPill label="Drag and drop enabled" />}
-        >
-          <div className="grid gap-4 lg:grid-cols-2">
-            <AnimatePresence>
-              {orderedWidgets.map((entry, index) => {
-                const meta = entry.meta;
-                if (!meta) {
-                  return null;
-                }
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* Submissions to grade */}
+          <ShellSection
+            title="Submissions Awaiting Grades"
+            subtitle="Students waiting on your feedback — grade from the Grade Center."
+            action={<button type="button" onClick={() => navigate('/app/assignments')} className="text-sm font-medium text-primary hover:underline">Open Grade Center</button>}
+          >
+            {pendingSubmissions.length === 0 ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-center text-sm text-emerald-300">
+                Grading queue is clear! All submissions are marked.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pendingSubmissions.map((sub) => {
+                  const assignment = state.assignments.find((a) => a.id === sub.assignmentId);
+                  const student = state.users.find((u) => u.id === sub.studentId);
+                  const submittedDate = new Date(sub.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => navigate('/app/assignments')}
+                      className="w-full rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-left transition hover:bg-amber-500/10"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <img src={student?.avatar} alt={student?.name} className="h-9 w-9 rounded-xl object-cover" />
+                          <div>
+                            <p className="text-sm font-semibold text-text-primary">{student?.name ?? 'Student'}</p>
+                            <p className="text-xs text-text-secondary">{assignment?.title ?? 'Assignment'}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-text-muted">Submitted {submittedDate}</p>
+                          <p className="mt-1 text-xs font-semibold text-amber-400">Needs grading</p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </ShellSection>
 
-                const Icon = meta.icon;
+          {/* Class overview */}
+          <ShellSection
+            title="My Classes"
+            subtitle="Active classrooms and their student progress."
+            action={<button type="button" onClick={() => navigate('/app/classes')} className="text-sm font-medium text-primary hover:underline">Manage classes</button>}
+          >
+            <div className="space-y-3">
+              {myClasses.slice(0, 4).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => navigate(`/app/classes/${c.id}`)}
+                  className="w-full rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:border-primary/40 hover:bg-white/10"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+                      <div>
+                        <p className="text-sm font-semibold text-text-primary">{c.title}</p>
+                        <p className="text-xs text-text-secondary">{c.subject} · Section {c.section}</p>
+                      </div>
+                    </div>
+                    <div className="text-right text-xs">
+                      <p className="font-semibold text-text-primary">{c.students} students</p>
+                      <p className="text-text-muted">Code: {c.code}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <div className="mb-1 flex justify-between text-xs text-text-muted">
+                      <span>Class progress</span>
+                      <span className="font-semibold text-text-secondary">{c.progress}%</span>
+                    </div>
+                    <ProgressBar value={c.progress} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ShellSection>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Quick create assignment */}
+          <ShellSection title="Quick Create Assignment" subtitle="Post a new assignment to a class instantly.">
+            <form className="space-y-3" onSubmit={handleQuickAssignment}>
+              <input
+                value={quickTitle}
+                onChange={(e) => setQuickTitle(e.target.value)}
+                placeholder="Assignment title"
+                className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+              />
+              <select
+                value={quickClassId}
+                onChange={(e) => setQuickClassId(e.target.value)}
+                className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+              >
+                {state.classes.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+              </select>
+              <input
+                value={quickDue}
+                onChange={(e) => setQuickDue(e.target.value)}
+                placeholder="Due date (e.g. May 20)"
+                className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-sm outline-none focus:border-primary/60"
+              />
+              <button type="submit" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110">
+                <Plus className="h-4 w-4" />
+                Create Assignment
+              </button>
+            </form>
+          </ShellSection>
+
+          {/* Upcoming class schedule */}
+          <ShellSection title="Upcoming Classes" subtitle="Your scheduled sessions this week.">
+            {upcomingClasses.length === 0 ? (
+              <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">No upcoming classes scheduled.</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingClasses.map((ev) => (
+                  <button key={ev.id} type="button" onClick={() => navigate('/app/calendar')} className="w-full rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:bg-white/10">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-text-primary">{ev.title}</p>
+                        <p className="text-xs text-text-muted mt-0.5">{ev.date} · {ev.startTime} – {ev.endTime}</p>
+                      </div>
+                      <CalendarDays className="h-4 w-4 text-emerald-400" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </ShellSection>
+
+          {/* Notifications */}
+          <ShellSection title="Notifications" subtitle="Recent platform alerts.">
+            <div className="space-y-3">
+              {unreadNotifications.length === 0 ? (
+                <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">No new notifications.</p>
+              ) : (
+                unreadNotifications.map((n) => <NotificationCard key={n.id} notification={n} />)
+              )}
+            </div>
+          </ShellSection>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminDashboard() {
+  const navigate = useNavigate();
+  const { currentUser, state } = useLms();
+  const analytics = analyticsByRole['admin'];
+
+  const totalUsers = state.users.length;
+  const studentCount = state.users.filter((u) => u.role === 'student').length;
+  const teacherCount = state.users.filter((u) => u.role === 'teacher').length;
+  const adminCount = state.users.filter((u) => u.role === 'admin').length;
+  const activeClasses = state.classes.filter((c) => !c.archived).length;
+  const archivedClasses = state.classes.filter((c) => c.archived).length;
+  const totalSubmissions = state.submissions.length;
+  const pendingSubmissions = state.submissions.filter((s) => s.score === undefined).length;
+  const recentUsers = [...state.users].slice(-5).reverse();
+
+  return (
+    <div className="space-y-8">
+      {/* Hero */}
+      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(124,58,237,0.22),rgba(37,99,235,0.12),rgba(239,68,68,0.06))] p-7 sm:p-10">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/20 bg-purple-500/10 px-3 py-1 text-xs uppercase tracking-widest text-purple-300">
+              <Shield className="h-3 w-3" />
+              Administrator Portal
+            </div>
+            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Platform Overview
+            </h1>
+            <p className="max-w-xl text-lg text-white/70">
+              <span className="font-semibold text-white">{totalUsers} users</span> across <span className="font-semibold text-purple-300">{activeClasses} active classes</span>. Platform is operating normally.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button type="button" onClick={() => navigate('/app/admin')} className="inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:brightness-110">
+                <Users className="h-4 w-4" />
+                Manage Users
+              </button>
+              <button type="button" onClick={() => navigate('/app/analytics')} className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
+                <Workflow className="h-4 w-4" />
+                Platform Analytics
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 xl:min-w-[280px]">
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Total Users</p>
+              <p className="mt-1 text-3xl font-bold text-white">{totalUsers}</p>
+              <p className="mt-1 text-xs text-text-secondary">All roles</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Active Classes</p>
+              <p className="mt-1 text-3xl font-bold text-purple-400">{activeClasses}</p>
+              <p className="mt-1 text-xs text-text-secondary">{archivedClasses} archived</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Submissions</p>
+              <p className="mt-1 text-3xl font-bold text-amber-400">{pendingSubmissions}</p>
+              <p className="mt-1 text-xs text-text-secondary">Pending review</p>
+            </div>
+            <div className={metricClass + ' text-center'}>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Engagement</p>
+              <p className="mt-1 text-3xl font-bold text-emerald-400">{analytics.engagement}%</p>
+              <p className="mt-1 text-xs text-text-secondary">Platform-wide</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1.3fr_1fr]">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* User distribution */}
+          <ShellSection title="User Distribution" subtitle="Breakdown of all registered accounts by role.">
+            <div className="space-y-4">
+              {[
+                { label: 'Students', count: studentCount, total: totalUsers, color: 'bg-blue-500', textColor: 'text-blue-400' },
+                { label: 'Teachers / Educators', count: teacherCount, total: totalUsers, color: 'bg-emerald-500', textColor: 'text-emerald-400' },
+                { label: 'Administrators', count: adminCount, total: totalUsers, color: 'bg-purple-500', textColor: 'text-purple-400' },
+              ].map((role) => (
+                <div key={role.label}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-text-secondary">{role.label}</span>
+                    <span className={`text-sm font-bold ${role.textColor}`}>{role.count} <span className="text-text-muted font-normal">({Math.round((role.count / role.total) * 100)}%)</span></span>
+                  </div>
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/5">
+                    <div
+                      className={`h-full rounded-full ${role.color}`}
+                      style={{ width: `${(role.count / role.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-border-subtle bg-blue-500/10 p-3 text-center">
+                <p className="text-2xl font-bold text-blue-400">{studentCount}</p>
+                <p className="text-xs text-text-muted">Students</p>
+              </div>
+              <div className="rounded-2xl border border-border-subtle bg-emerald-500/10 p-3 text-center">
+                <p className="text-2xl font-bold text-emerald-400">{teacherCount}</p>
+                <p className="text-xs text-text-muted">Teachers</p>
+              </div>
+              <div className="rounded-2xl border border-border-subtle bg-purple-500/10 p-3 text-center">
+                <p className="text-2xl font-bold text-purple-400">{adminCount}</p>
+                <p className="text-xs text-text-muted">Admins</p>
+              </div>
+            </div>
+          </ShellSection>
+
+          {/* Platform stats */}
+          <ShellSection title="Platform Activity" subtitle="Content and workflow statistics.">
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Total Classes', value: state.classes.length, sub: `${activeClasses} active` },
+                { label: 'Assignments', value: state.assignments.length, sub: 'Across all classes' },
+                { label: 'Submissions', value: totalSubmissions, sub: `${pendingSubmissions} pending` },
+                { label: 'Resources', value: state.resources.length, sub: 'Files and links' },
+                { label: 'Discussions', value: state.discussions.length, sub: 'Active threads' },
+                { label: 'Events', value: state.events.length, sub: 'Scheduled' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-border-subtle bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-widest text-text-muted">{item.label}</p>
+                  <p className="mt-1 text-2xl font-bold text-text-primary">{item.value}</p>
+                  <p className="mt-0.5 text-xs text-text-secondary">{item.sub}</p>
+                </div>
+              ))}
+            </div>
+          </ShellSection>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          {/* Recent users */}
+          <ShellSection
+            title="Registered Users"
+            subtitle="Recently added accounts on the platform."
+            action={<button type="button" onClick={() => navigate('/app/admin')} className="text-sm font-medium text-primary hover:underline">Manage all</button>}
+          >
+            <div className="space-y-3">
+              {recentUsers.map((user) => {
+                const roleColors: Record<string, string> = {
+                  student: 'text-blue-400 bg-blue-500/10',
+                  teacher: 'text-emerald-400 bg-emerald-500/10',
+                  admin: 'text-purple-400 bg-purple-500/10',
+                };
                 return (
-                  <motion.article
-                    layout
-                    key={entry.type}
-                    draggable
-                    onDragStart={() => setDraggedWidget(entry.type)}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={() => {
-                      if (!draggedWidget || draggedWidget === entry.type) {
-                        return;
-                      }
-                      const from = widgetOrder.indexOf(draggedWidget);
-                      const to = widgetOrder.indexOf(entry.type);
-                      moveWidget(from, to);
-                      setDraggedWidget(null);
-                    }}
-                    className="rounded-3xl border border-border-subtle bg-white/5 p-5 transition hover:border-primary/40 hover:bg-white/[0.07]"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className="rounded-2xl bg-primary/20 p-3 text-primary">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <h3 className="text-base font-semibold text-text-primary">{meta.title}</h3>
-                          <p className="mt-1 text-sm text-text-secondary">{meta.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-text-muted">
-                        <button type="button" onClick={() => moveWidget(index, index - 1)} className="rounded-full border border-border-subtle p-2 transition hover:border-primary/50 hover:text-text-primary"><ChevronLeft className="h-4 w-4" /></button>
-                        <button type="button" onClick={() => moveWidget(index, index + 1)} className="rounded-full border border-border-subtle p-2 transition hover:border-primary/50 hover:text-text-primary"><ChevronRight className="h-4 w-4" /></button>
-                      </div>
+                  <div key={user.id} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 p-3">
+                    <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-xl object-cover" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text-primary truncate">{user.name}</p>
+                      <p className="text-xs text-text-muted truncate">{user.email}</p>
                     </div>
-
-                    <div className="mt-5">
-                      {entry.type === 'progress' ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-text-secondary">Current progress</span>
-                            <span className="font-semibold text-white">{analytics.completion}%</span>
-                          </div>
-                          <ProgressBar value={analytics.completion} />
-                          <div className="grid grid-cols-3 gap-3 text-sm text-text-secondary">
-                            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3">
-                              <p className="text-xs uppercase tracking-[0.24em]">Grade</p>
-                              <p className="mt-1 text-lg font-semibold text-text-primary">{analytics.averageGrade}%</p>
-                            </div>
-                            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3">
-                              <p className="text-xs uppercase tracking-[0.24em]">Engagement</p>
-                              <p className="mt-1 text-lg font-semibold text-text-primary">{analytics.engagement}%</p>
-                            </div>
-                            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3">
-                              <p className="text-xs uppercase tracking-[0.24em]">Streak</p>
-                              <p className="mt-1 text-lg font-semibold text-text-primary">{analytics.streak}d</p>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {entry.type === 'classes' ? (
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          {classes.map((classroom) => (
-                            <div key={classroom.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-text-primary">{classroom.title}</p>
-                                  <p className="text-xs text-text-secondary">{classroom.subject} · {classroom.section}</p>
-                                </div>
-                                <span className="h-3 w-3 rounded-full" style={getClassColor(classroom)} />
-                              </div>
-                              <div className="mt-3 flex items-center justify-between text-xs text-text-secondary">
-                                <span>{classroom.students} learners</span>
-                                <span>{classroom.code}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      {entry.type === 'assignments' ? (
-                        <div className="space-y-3">
-                          {assignments.map((assignment) => (
-                            <div key={assignment.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-text-primary">{assignment.title}</p>
-                                  <p className="text-xs text-text-secondary">{assignment.kind} · {assignment.dueDate}</p>
-                                </div>
-                                <ViewPill label={assignment.status} />
-                              </div>
-                              <ProgressBar value={assignment.maxPoints ? (assignment.averageScore / assignment.maxPoints) * 100 : 0} />
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      {entry.type === 'activity' ? (
-                        <div className="space-y-3">
-                          {app?.discussions.slice(0, 3).map((thread) => (
-                            <div key={thread.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-text-primary">{thread.author}</p>
-                                  <p className="mt-1 text-sm text-text-secondary">{thread.message}</p>
-                                </div>
-                                {thread.pinned ? <ViewPill label="Pinned" /> : null}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      {entry.type === 'assistant' ? (
-                        <div className="space-y-3">
-                          <div className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">
-                            <p className="font-semibold text-text-primary">Suggested study plan</p>
-                            <p className="mt-2">Review rubric examples, finish today’s submission, then spend 20 minutes in the discussion thread to answer one peer question.</p>
-                          </div>
-                          <div className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">
-                            <p className="font-semibold text-text-primary">Recommended resources</p>
-                            <p className="mt-2">State machine workshop, critique rubric, and peer feedback checklist are most relevant right now.</p>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {entry.type === 'calendar' ? (
-                        <div className="space-y-3">
-                          {app?.events.slice(0, 3).map((event) => (
-                            <div key={event.id} className="rounded-2xl border border-border-subtle bg-black/10 p-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-text-primary">{event.title}</p>
-                                  <p className="text-xs text-text-secondary">{event.date} · {event.startTime} - {event.endTime}</p>
-                                </div>
-                                <CalendarDays className="h-4 w-4 text-text-muted" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                  </motion.article>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${roleColors[user.role]}`}>
+                      {user.role}
+                    </span>
+                  </div>
                 );
               })}
-            </AnimatePresence>
-          </div>
-        </ShellSection>
+            </div>
+          </ShellSection>
 
-        <div className="space-y-6">
-          <ShellSection title="Priority notifications" subtitle="Unread items are surfaced here first.">
+          {/* System health */}
+          <ShellSection title="System Health" subtitle="Current platform operational status.">
             <div className="space-y-3">
-              {notifications.map((notification) => (
-                <NotificationCard key={notification.id} notification={notification} />
+              {[
+                { label: 'API Uptime', value: '99.98%', status: 'healthy' },
+                { label: 'Auth System', value: 'Operational', status: 'healthy' },
+                { label: 'File Storage', value: 'Connected', status: 'healthy' },
+                { label: 'Notifications', value: `${state.notifications.filter(n => n.unread).length} unread`, status: 'info' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${item.status === 'healthy' ? 'bg-emerald-400' : 'bg-blue-400'}`} />
+                    <span className="text-sm font-semibold text-text-primary">{item.value}</span>
+                  </div>
+                </div>
               ))}
             </div>
           </ShellSection>
 
-          <ShellSection title="Today at a glance" subtitle="A compact feed of tasks, meetings, and reminders.">
-            <div className="space-y-3">
-              {app?.events.slice(0, 3).map((event) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+          {/* Quick actions */}
+          <ShellSection title="Quick Actions" subtitle="Common administrative tasks.">
+            <div className="grid grid-cols-1 gap-3">
+              <button type="button" onClick={() => navigate('/app/admin')} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:border-purple-500/40 hover:bg-purple-500/5">
+                <div className="rounded-xl bg-purple-500/20 p-2">
+                  <Users className="h-4 w-4 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">Add New User</p>
+                  <p className="text-xs text-text-muted">Create a student, teacher, or admin account</p>
+                </div>
+              </button>
+              <button type="button" onClick={() => navigate('/app/analytics')} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:border-blue-500/40 hover:bg-blue-500/5">
+                <div className="rounded-xl bg-blue-500/20 p-2">
+                  <Workflow className="h-4 w-4 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">View Full Analytics</p>
+                  <p className="text-xs text-text-muted">Platform-wide engagement and performance data</p>
+                </div>
+              </button>
+              <button type="button" onClick={() => navigate('/app/classes')} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 p-4 text-left transition hover:border-emerald-500/40 hover:bg-emerald-500/5">
+                <div className="rounded-xl bg-emerald-500/20 p-2">
+                  <BookOpen className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">Manage Classes</p>
+                  <p className="text-xs text-text-muted">Archive, review, and oversee all classrooms</p>
+                </div>
+              </button>
             </div>
           </ShellSection>
         </div>
@@ -636,19 +1005,29 @@ export function ClassesPage() {
     setForm({ title: '', subject: '', section: '', description: '' });
   };
 
+  const pageHeader = currentRole === 'admin'
+    ? { label: 'All Classes', title: 'Oversee, archive, and manage every classroom on the platform' }
+    : currentRole === 'teacher'
+      ? { label: 'My Classes', title: 'Create new classrooms and manage your existing sections' }
+      : { label: 'My Courses', title: 'Browse your enrolled courses and join new classes with a code' };
+
+  const createSectionTitle = currentRole === 'admin'
+    ? 'Create class (Admin)'
+    : 'Create new classroom';
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Classrooms</p>
-          <h1 className="mt-2 text-3xl font-semibold text-text-primary">Create, join, archive, and organize classes</h1>
+          <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{pageHeader.label}</p>
+          <h1 className="mt-2 text-3xl font-semibold text-text-primary">{pageHeader.title}</h1>
         </div>
         <ViewPill label={`${state.classes.filter((item) => !item.archived).length} active`} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         {canManageClasses && (
-          <ShellSection title="Create class" subtitle="Teachers and admins can spin up a class in seconds.">
+          <ShellSection title={createSectionTitle} subtitle={currentRole === 'admin' ? 'Admins can create and assign classes to any teacher.' : 'Spin up a new class in seconds and share the join code with students.'}>
             <form className="space-y-4" onSubmit={onSubmit}>
               <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Class title" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
               <input value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} placeholder="Subject" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
@@ -781,20 +1160,26 @@ export function AssignmentsPage() {
     }
   };
 
+  const assignPageHeader = currentRole === 'teacher'
+    ? { label: 'Grade Center', title: 'Create assignments, review submissions, and give feedback to students' }
+    : currentRole === 'admin'
+      ? { label: 'Assignment Overview', title: 'Monitor and manage all assignments and submissions platform-wide' }
+      : { label: 'Assignments', title: 'View your pending work, submit assignments, and check your grades' };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Assignments</p>
-          <h1 className="mt-2 text-3xl font-semibold text-text-primary">Design quizzes, projects, rubric grading, and feedback</h1>
+          <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{assignPageHeader.label}</p>
+          <h1 className="mt-2 text-3xl font-semibold text-text-primary">{assignPageHeader.title}</h1>
         </div>
-        <ViewPill label={currentRole === 'teacher' ? 'Teacher controls on' : 'Learner view'} />
+        <ViewPill label={currentRole === 'teacher' ? 'Teacher controls' : currentRole === 'admin' ? 'Admin view' : 'Student view'} />
       </div>
 
       {canCreateAssignments ? (
         <div className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-            <ShellSection title="Create assignment" subtitle="Add new work with deadlines, max points, and an optional material file.">
+            <ShellSection title={currentRole === 'admin' ? 'Create assignment (Admin)' : 'Create new assignment'} subtitle={currentRole === 'admin' ? 'Admins can post assignments to any class.' : 'Add work with deadlines, max points, and an optional material file.'}>
               <form className="space-y-4" onSubmit={onPublish}>
                 <select value={form.classId} onChange={(event) => setForm({ ...form, classId: event.target.value })} className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60">
                   {state.classes.map((classroom) => <option key={classroom.id} value={classroom.id}>{classroom.title}</option>)}
@@ -1179,44 +1564,125 @@ function TeacherGradeCard({ submission, assignment, studentName, onGrade }: {
 }
 
 export function CollaborationPage() {
-  const { state, currentUser, createThread } = useLms();
+  const { state, currentUser, currentRole, createThread } = useLms();
   const [classId, setClassId] = useState(state.classes[0]?.id ?? '');
   const [threadMessage, setThreadMessage] = useState('');
 
   const threads = state.discussions.filter((thread) => thread.classId === classId);
 
+  const collabHeader = currentRole === 'teacher'
+    ? { label: 'Discussions', placeholder: 'Post an announcement, start a discussion, or answer a student question...' }
+    : currentRole === 'admin'
+      ? { label: 'Community', placeholder: 'Post a platform-wide announcement or moderation note...' }
+      : { label: 'Discussions', placeholder: 'Ask a question, contribute to a discussion, or @mention your teacher...' };
+
+  const allThreads = currentRole === 'admin' ? state.discussions : threads;
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-      <ShellSection title="Class discussions" subtitle="Threaded conversations, mentions, and pinned notes.">
-        <div className="mb-4 flex items-center gap-3">
-          <select value={classId} onChange={(event) => setClassId(event.target.value)} className="rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60">
-            {state.classes.map((classroom) => <option key={classroom.id} value={classroom.id}>{classroom.title}</option>)}
-          </select>
-          <ViewPill label={`${threads.length} threads`} />
-        </div>
-
-        <form
-          className="mb-5 space-y-3 rounded-3xl border border-border-subtle bg-black/10 p-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (!currentUser || !threadMessage.trim()) {
-              return;
-            }
-            createThread({ classId, author: currentUser.name, message: threadMessage, role: currentUser.role });
-            setThreadMessage('');
-          }}
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{collabHeader.label}</p>
+        <h1 className="mt-2 text-3xl font-semibold text-text-primary">
+          {currentRole === 'teacher' ? 'Manage class discussions and post announcements' : currentRole === 'admin' ? 'Platform-wide community and moderation' : 'Join class discussions and connect with peers'}
+        </h1>
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <ShellSection
+          title={currentRole === 'admin' ? 'All platform discussions' : 'Class discussions'}
+          subtitle={currentRole === 'admin' ? 'Viewing all threads across every class.' : 'Threaded conversations, mentions, and pinned notes.'}
         >
-          <textarea value={threadMessage} onChange={(event) => setThreadMessage(event.target.value)} rows={3} placeholder="Start a discussion, mention @teacher, or ask a question..." className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
-          <button className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 font-semibold text-white transition hover:brightness-110">
-            <MessageCircle className="h-4 w-4" />
-            Post thread
-          </button>
-        </form>
+          {currentRole !== 'admin' && (
+            <div className="mb-4 flex items-center gap-3">
+              <select value={classId} onChange={(event) => setClassId(event.target.value)} className="rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60">
+                {state.classes.map((classroom) => <option key={classroom.id} value={classroom.id}>{classroom.title}</option>)}
+              </select>
+              <ViewPill label={`${threads.length} threads`} />
+            </div>
+          )}
+          {currentRole === 'admin' && (
+            <div className="mb-4">
+              <ViewPill label={`${allThreads.length} total threads`} />
+            </div>
+          )}
 
-        <div className="space-y-3">
-          {threads.map((thread) => <ThreadCard key={thread.id} thread={thread} />)}
+          <form
+            className="mb-5 space-y-3 rounded-3xl border border-border-subtle bg-black/10 p-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!currentUser || !threadMessage.trim()) return;
+              createThread({ classId: currentRole === 'admin' ? (state.classes[0]?.id ?? classId) : classId, author: currentUser.name, message: threadMessage, role: currentUser.role });
+              setThreadMessage('');
+            }}
+          >
+            <textarea value={threadMessage} onChange={(event) => setThreadMessage(event.target.value)} rows={3} placeholder={collabHeader.placeholder} className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60" />
+            <button className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 font-semibold text-white transition hover:brightness-110">
+              <MessageCircle className="h-4 w-4" />
+              {currentRole === 'teacher' ? 'Post announcement' : currentRole === 'admin' ? 'Post message' : 'Post thread'}
+            </button>
+          </form>
+
+          <div className="space-y-3">
+            {allThreads.map((thread) => <ThreadCard key={thread.id} thread={thread} />)}
+          </div>
+        </ShellSection>
+
+        <div className="space-y-6">
+          {currentRole === 'admin' && (
+            <ShellSection title="Moderation Summary" subtitle="Discussion health across the platform.">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Total threads</span>
+                  <span className="font-bold text-text-primary">{state.discussions.length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Pinned posts</span>
+                  <span className="font-bold text-text-primary">{state.discussions.filter(d => d.pinned).length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">By teachers</span>
+                  <span className="font-bold text-emerald-400">{state.discussions.filter(d => d.role === 'teacher').length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">By students</span>
+                  <span className="font-bold text-blue-400">{state.discussions.filter(d => d.role === 'student').length}</span>
+                </div>
+              </div>
+            </ShellSection>
+          )}
+          {currentRole === 'teacher' && (
+            <ShellSection title="Class Engagement" subtitle="Discussion activity in this class.">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Threads in class</span>
+                  <span className="font-bold text-text-primary">{threads.length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">From students</span>
+                  <span className="font-bold text-blue-400">{threads.filter(t => t.role === 'student').length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Total replies</span>
+                  <span className="font-bold text-text-primary">{threads.reduce((s, t) => s + t.replies, 0)}</span>
+                </div>
+              </div>
+            </ShellSection>
+          )}
+          {currentRole === 'student' && (
+            <ShellSection title="Activity" subtitle="Your contributions in this class.">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Total threads</span>
+                  <span className="font-bold text-text-primary">{threads.length}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                  <span className="text-sm text-text-secondary">Pinned posts</span>
+                  <span className="font-bold text-text-primary">{threads.filter(t => t.pinned).length}</span>
+                </div>
+              </div>
+            </ShellSection>
+          )}
         </div>
-      </ShellSection>
+      </div>
     </div>
   );
 }
@@ -1246,56 +1712,303 @@ function ThreadCard({ thread }: { thread: DiscussionThread; key?: string | numbe
 // Live chat UI removed — ChatBubble component no longer used.
 
 export function AnalyticsPage() {
-  const { analyticsKey, state } = useLms();
-  const analytics = analyticsByRole[analyticsKey];
-  const maxWeek = Math.max(...analytics.weeklyProgress);
+  const { currentRole } = useLms();
+  if (currentRole === 'teacher') return <TeacherAnalytics />;
+  if (currentRole === 'admin') return <AdminAnalytics />;
+  return <StudentAnalytics />;
+}
+
+function StudentAnalytics() {
+  const { state, analyticsKey } = useLms();
+  const analytics = analyticsByRole[analyticsKey] ?? analyticsByRole['student'];
+  const maxWeek = Math.max(...analytics.weeklyProgress, 1);
+  const gradedSubmissions = state.submissions.filter((s) => s.score !== undefined);
 
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Analytics</p>
-        <h1 className="mt-2 text-3xl font-semibold text-text-primary">Progress, engagement, attendance, and performance insights</h1>
+        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">My Grades</p>
+        <h1 className="mt-2 text-3xl font-semibold text-text-primary">Your personal learning progress and grade history</h1>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-4">
-        <StatCard title="Attendance" value={`${analytics.attendance}%`} note="Rolling 30-day check-in rate" icon={Users} accent="bg-blue-500" />
-        <StatCard title="Completion" value={`${analytics.completion}%`} note="Assignment completion this term" icon={CheckCircle2} accent="bg-emerald-500" />
-        <StatCard title="Average grade" value={`${analytics.averageGrade}%`} note="Weighted across current coursework" icon={GraduationCap} accent="bg-amber-500" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="My GPA" value={`${analytics.averageGrade}%`} note="Weighted across all coursework" icon={GraduationCap} accent="bg-amber-500" />
+        <StatCard title="Completion" value={`${analytics.completion}%`} note="Assignments submitted on time" icon={CheckCircle2} accent="bg-emerald-500" />
+        <StatCard title="Attendance" value={`${analytics.attendance}%`} note="Classes attended this term" icon={Users} accent="bg-blue-500" />
+        <StatCard title="Study Streak" value={`${analytics.streak} days`} note="Consecutive active days" icon={Target} accent="bg-purple-500" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <ShellSection title="Weekly progress" subtitle="The bars below simulate term-over-term movement.">
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <ShellSection title="Weekly Study Activity" subtitle="Your learning engagement across the past 7 weeks.">
           <div className="grid grid-cols-7 gap-3">
             {analytics.weeklyProgress.map((value, index) => (
               <div key={index} className="flex flex-col items-center gap-2">
                 <div className="flex h-40 w-full items-end rounded-2xl border border-border-subtle bg-black/10 p-2">
-                  <div className="w-full rounded-xl bg-gradient-to-t from-primary to-secondary" style={{ height: `${(value / maxWeek) * 100}%` }} />
+                  <div className="w-full rounded-xl bg-gradient-to-t from-blue-600 to-blue-400" style={{ height: `${(value / maxWeek) * 100}%` }} />
                 </div>
                 <p className="text-xs text-text-muted">W{index + 1}</p>
               </div>
             ))}
           </div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Engagement</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{analytics.engagement}%</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Best week</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{maxWeek}h</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Courses</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{state.classes.filter(c => !c.archived).length}</p>
+            </div>
+          </div>
         </ShellSection>
 
+        <div className="space-y-6">
+          <ShellSection title="Graded Work" subtitle="Your scored assignments and feedback.">
+            {gradedSubmissions.length === 0 ? (
+              <p className="rounded-2xl border border-border-subtle bg-black/10 p-4 text-sm text-text-secondary">No graded work yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {gradedSubmissions.map((sub) => {
+                  const assignment = state.assignments.find((a) => a.id === sub.assignmentId);
+                  const pct = assignment?.maxPoints ? Math.round((sub.score! / assignment.maxPoints) * 100) : 0;
+                  return (
+                    <div key={sub.id} className="rounded-2xl border border-border-subtle bg-white/5 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-text-primary">{assignment?.title ?? 'Assignment'}</p>
+                        <span className={`text-base font-bold ${pct >= 80 ? 'text-emerald-400' : pct >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
+                          {sub.score}/{assignment?.maxPoints}
+                        </span>
+                      </div>
+                      <ProgressBar value={pct} />
+                      {sub.teacherFeedback && (
+                        <p className="mt-2 text-xs italic text-text-muted">"{sub.teacherFeedback}"</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </ShellSection>
 
+          <ShellSection title="Course Progress" subtitle="Completion across your enrolled courses.">
+            <div className="space-y-3">
+              {state.classes.filter(c => !c.archived).slice(0, 4).map((c) => (
+                <div key={c.id} className="rounded-2xl border border-border-subtle bg-white/5 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-text-primary">{c.title}</p>
+                    <span className="text-sm font-bold text-text-primary">{c.progress}%</span>
+                  </div>
+                  <ProgressBar value={c.progress} />
+                </div>
+              ))}
+            </div>
+          </ShellSection>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeacherAnalytics() {
+  const { state, analyticsKey } = useLms();
+  const analytics = analyticsByRole[analyticsKey] ?? analyticsByRole['teacher'];
+  const maxWeek = Math.max(...analytics.weeklyProgress, 1);
+  const activeClasses = state.classes.filter(c => !c.archived);
+  const totalStudents = activeClasses.reduce((sum, c) => sum + c.students, 0);
+  const gradedSubs = state.submissions.filter(s => s.score !== undefined).length;
+  const pendingSubs = state.submissions.filter(s => s.score === undefined).length;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Class Analytics</p>
+        <h1 className="mt-2 text-3xl font-semibold text-text-primary">Student performance and classroom engagement insights</h1>
       </div>
 
-      <ShellSection title="Live platform overview" subtitle="Current application data captured from the persisted store.">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
-            <p className="text-sm text-text-secondary">Active classes</p>
-            <p className="mt-1 text-2xl font-semibold text-text-primary">{state.classes.filter((item) => !item.archived).length}</p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Students" value={totalStudents} note="Across all active classes" icon={Users} accent="bg-blue-500" />
+        <StatCard title="Avg Class Grade" value={`${analytics.averageGrade}%`} note="Weighted across assignments" icon={GraduationCap} accent="bg-amber-500" />
+        <StatCard title="Graded" value={gradedSubs} note="Submissions marked this term" icon={CheckCircle2} accent="bg-emerald-500" />
+        <StatCard title="Pending Review" value={pendingSubs} note="Submissions waiting for a grade" icon={Target} accent="bg-red-500" />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <ShellSection title="Class Submission Trends" subtitle="Weekly submission rates across your classes.">
+          <div className="grid grid-cols-7 gap-3">
+            {analytics.weeklyProgress.map((value, index) => (
+              <div key={index} className="flex flex-col items-center gap-2">
+                <div className="flex h-40 w-full items-end rounded-2xl border border-border-subtle bg-black/10 p-2">
+                  <div className="w-full rounded-xl bg-gradient-to-t from-emerald-600 to-emerald-400" style={{ height: `${(value / maxWeek) * 100}%` }} />
+                </div>
+                <p className="text-xs text-text-muted">W{index + 1}</p>
+              </div>
+            ))}
           </div>
-          <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
-            <p className="text-sm text-text-secondary">Unread notifications</p>
-            <p className="mt-1 text-2xl font-semibold text-text-primary">{state.notifications.filter((item) => item.unread).length}</p>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Attendance</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{analytics.attendance}%</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Completion</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{analytics.completion}%</p>
+            </div>
+            <div className="rounded-2xl border border-border-subtle bg-black/10 p-3 text-center">
+              <p className="text-xs text-text-muted">Engagement</p>
+              <p className="mt-1 text-xl font-bold text-text-primary">{analytics.engagement}%</p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-border-subtle bg-white/5 p-4">
-            <p className="text-sm text-text-secondary">Open resources</p>
-            <p className="mt-1 text-2xl font-semibold text-text-primary">{state.resources.length}</p>
-          </div>
+        </ShellSection>
+
+        <div className="space-y-6">
+          <ShellSection title="Class Performance" subtitle="Progress and student counts per class.">
+            <div className="space-y-3">
+              {activeClasses.slice(0, 5).map((c) => (
+                <div key={c.id} className="rounded-2xl border border-border-subtle bg-white/5 p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-text-primary">{c.title}</p>
+                      <p className="text-xs text-text-muted">{c.students} students</p>
+                    </div>
+                    <span className="text-sm font-bold text-emerald-400">{c.progress}%</span>
+                  </div>
+                  <ProgressBar value={c.progress} />
+                </div>
+              ))}
+            </div>
+          </ShellSection>
+
+          <ShellSection title="Grading Summary" subtitle="Submission status across your classes.">
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-border-subtle bg-emerald-500/10 p-4">
+                <p className="text-xs uppercase tracking-widest text-emerald-400">Graded</p>
+                <p className="mt-1 text-2xl font-bold text-text-primary">{gradedSubs}</p>
+              </div>
+              <div className="rounded-2xl border border-border-subtle bg-amber-500/10 p-4">
+                <p className="text-xs uppercase tracking-widest text-amber-400">Awaiting Grade</p>
+                <p className="mt-1 text-2xl font-bold text-text-primary">{pendingSubs}</p>
+              </div>
+              <div className="rounded-2xl border border-border-subtle bg-blue-500/10 p-4">
+                <p className="text-xs uppercase tracking-widest text-blue-400">Total Assignments</p>
+                <p className="mt-1 text-2xl font-bold text-text-primary">{state.assignments.length}</p>
+              </div>
+            </div>
+          </ShellSection>
         </div>
-      </ShellSection>
+      </div>
+    </div>
+  );
+}
+
+function AdminAnalytics() {
+  const { state, analyticsKey } = useLms();
+  const analytics = analyticsByRole[analyticsKey] ?? analyticsByRole['admin'];
+  const maxWeek = Math.max(...analytics.weeklyProgress, 1);
+  const studentCount = state.users.filter(u => u.role === 'student').length;
+  const teacherCount = state.users.filter(u => u.role === 'teacher').length;
+  const activeClasses = state.classes.filter(c => !c.archived).length;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Platform Analytics</p>
+        <h1 className="mt-2 text-3xl font-semibold text-text-primary">Platform-wide metrics, user growth, and system engagement</h1>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard title="Total Users" value={state.users.length} note={`${studentCount} students, ${teacherCount} teachers`} icon={Users} accent="bg-purple-500" />
+        <StatCard title="Platform Engagement" value={`${analytics.engagement}%`} note="Active sessions this month" icon={Target} accent="bg-blue-500" />
+        <StatCard title="Avg Completion" value={`${analytics.completion}%`} note="Assignment completion rate" icon={CheckCircle2} accent="bg-emerald-500" />
+        <StatCard title="Avg Attendance" value={`${analytics.attendance}%`} note="Check-in rate platform-wide" icon={GraduationCap} accent="bg-amber-500" />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+        <ShellSection title="Platform Activity (Weekly)" subtitle="Engagement levels across all user roles over the past 7 weeks.">
+          <div className="grid grid-cols-7 gap-3">
+            {analytics.weeklyProgress.map((value, index) => (
+              <div key={index} className="flex flex-col items-center gap-2">
+                <div className="flex h-40 w-full items-end rounded-2xl border border-border-subtle bg-black/10 p-2">
+                  <div className="w-full rounded-xl bg-gradient-to-t from-purple-600 to-purple-400" style={{ height: `${(value / maxWeek) * 100}%` }} />
+                </div>
+                <p className="text-xs text-text-muted">W{index + 1}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-4">
+            <ShellSection title="Content Overview" subtitle="">
+              <div className="space-y-3">
+                {[
+                  { label: 'Active Classes', value: activeClasses },
+                  { label: 'Total Assignments', value: state.assignments.length },
+                  { label: 'Submissions', value: state.submissions.length },
+                  { label: 'Resources', value: state.resources.length },
+                  { label: 'Discussion Threads', value: state.discussions.length },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between rounded-xl border border-border-subtle bg-black/10 px-3 py-2">
+                    <span className="text-sm text-text-secondary">{item.label}</span>
+                    <span className="text-sm font-bold text-text-primary">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </ShellSection>
+            <ShellSection title="Grading Status" subtitle="">
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-border-subtle bg-emerald-500/10 p-4 text-center">
+                  <p className="text-xs text-emerald-400 uppercase tracking-widest">Graded</p>
+                  <p className="mt-1 text-3xl font-bold text-text-primary">{state.submissions.filter(s => s.score !== undefined).length}</p>
+                </div>
+                <div className="rounded-2xl border border-border-subtle bg-amber-500/10 p-4 text-center">
+                  <p className="text-xs text-amber-400 uppercase tracking-widest">Pending</p>
+                  <p className="mt-1 text-3xl font-bold text-text-primary">{state.submissions.filter(s => s.score === undefined).length}</p>
+                </div>
+              </div>
+            </ShellSection>
+          </div>
+        </ShellSection>
+
+        <div className="space-y-6">
+          <ShellSection title="User Roster" subtitle="All registered platform accounts.">
+            <div className="space-y-2">
+              {state.users.map((user) => {
+                const roleColors: Record<string, string> = {
+                  student: 'bg-blue-500/10 text-blue-400',
+                  teacher: 'bg-emerald-500/10 text-emerald-400',
+                  admin: 'bg-purple-500/10 text-purple-400',
+                };
+                return (
+                  <div key={user.id} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 p-3">
+                    <img src={user.avatar} alt={user.name} className="h-9 w-9 rounded-xl object-cover" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text-primary truncate">{user.name}</p>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${roleColors[user.role]}`}>
+                      {user.role}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </ShellSection>
+
+          <ShellSection title="Notifications" subtitle="Recent platform alerts.">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-white/5 px-4 py-3">
+                <span className="text-sm text-text-secondary">Total</span>
+                <span className="font-bold text-text-primary">{state.notifications.length}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border border-border-subtle bg-red-500/10 px-4 py-3">
+                <span className="text-sm text-text-secondary">Unread</span>
+                <span className="font-bold text-red-400">{state.notifications.filter(n => n.unread).length}</span>
+              </div>
+            </div>
+          </ShellSection>
+        </div>
+      </div>
     </div>
   );
 }

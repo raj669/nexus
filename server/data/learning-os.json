@@ -18,7 +18,7 @@
       {
         "id": "user-student",
         "name": "Alex Rivers",
-        "email": "alex@nexus.dev",
+        "email": "alex@uniplanner.dev",
         "role": "student",
         "title": "Product Design Student",
         "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop",
@@ -35,7 +35,7 @@
       {
         "id": "user-teacher",
         "name": "Sarah Jenkins",
-        "email": "sarah@nexus.dev",
+        "email": "sarah@uniplanner.dev",
         "role": "teacher",
         "title": "Senior Instructor",
         "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop",
@@ -52,7 +52,7 @@
       {
         "id": "user-admin",
         "name": "Noah Patel",
-        "email": "admin@nexus.dev",
+        "email": "admin@uniplanner.dev",
         "role": "admin",
         "title": "Platform Administrator",
         "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop",
@@ -413,6 +413,26 @@
   ],
   "analyticsEvents": [
     {
+      "id": "event-a5d2138e-4565-427d-9a39-5e5cf17d0adc",
+      "userId": "user-student",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "student"
+      },
+      "createdAt": "2026-05-09T07:15:38.337Z"
+    },
+    {
+      "id": "event-d96dae98-d5f1-42eb-8907-c1b3242e75f0",
+      "userId": "user-teacher",
+      "type": "auth",
+      "name": "login_success",
+      "payload": {
+        "role": "teacher"
+      },
+      "createdAt": "2026-05-09T07:15:06.165Z"
+    },
+    {
       "id": "event-b7f61a9b-cb4d-4251-b27a-9db0261d49e2",
       "userId": "user-student",
       "type": "auth",
@@ -577,18 +597,18 @@
   ],
   "sessions": [
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODI2MDI5MjU2MCwiZXhwIjoxNzc4Mjg5MDkyNTYwLCJqdGkiOiJmZDg0ZmY5NC05ZWM2LTQwMzUtYWZkNi1jOTA1Y2E4MmUyNDgifQ.kMeMnnGdAwHUk-quJu8rzoL0-__JnPirBWOSvmXY9oU",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXN0dWRlbnQiLCJyb2xlIjoic3R1ZGVudCIsImlhdCI6MTc3ODMxMDkzODMzMywiZXhwIjoxNzc4MzM5NzM4MzMzLCJqdGkiOiIzOTc4NzU2NS02MmJjLTQyMTktYmFlOC1mNWY3MDBlZDljZTgifQ._w67YDXCtlYLjurncOTkW_TWWGIJhGKHqB3uqj-4xjQ",
       "userId": "user-student",
       "role": "student",
-      "issuedAt": 1778260292560,
-      "expiresAt": 1778289092560
+      "issuedAt": 1778310938334,
+      "expiresAt": 1778339738333
     },
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODI1NTkyMjU5MiwiZXhwIjoxNzc4Mjg0NzIyNTkyLCJqdGkiOiJmOWFmYjE0Yi1kODljLTRiYjItOTI5OC1lODc4ZmE2YTNmODgifQ.gQlws7s-vNN7PBgBTJ2oNFX2ERyAgUwrhlyz7gsPrXg",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLXRlYWNoZXIiLCJyb2xlIjoidGVhY2hlciIsImlhdCI6MTc3ODMxMDkwNjE1OSwiZXhwIjoxNzc4MzM5NzA2MTU5LCJqdGkiOiIyYjRhY2VlNS1jNzdjLTQ1OTAtODU5Mi0yMDMyY2IyNTM4NWQifQ.AaUW5Qpnm9vinwqb6JmpNTHzbkkUkdY23NfztWFKkDI",
       "userId": "user-teacher",
       "role": "teacher",
-      "issuedAt": 1778255922592,
-      "expiresAt": 1778284722592
+      "issuedAt": 1778310906160,
+      "expiresAt": 1778339706159
     },
     {
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWFkbWluIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc4MjU1MjczNjMzLCJleHAiOjE3NzgyODQwNzM2MzMsImp0aSI6IjQzMTJkZDk3LTQyMjctNDMxNi1hZmE0LWIxYTIwNDk2MmQ0YiJ9.LlRGN-Ybpg9F4GQR2qo6sgg0HENFfARpXJOIi-iNQuw",

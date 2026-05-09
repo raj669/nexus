@@ -1,6 +1,6 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'crypto';
 
-const JWT_SECRET = process.env.LEARNING_OS_JWT_SECRET ?? 'nexus-learning-os-dev-secret';
+const JWT_SECRET = process.env.LEARNING_OS_JWT_SECRET ?? 'uniplanner-learning-os-dev-secret';
 const JWT_HEADER = { alg: 'HS256', typ: 'JWT' };
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
 

@@ -1,4 +1,4 @@
-# Stitch / Nexus Learning OS — Local Development
+# Stitch / UniPlanner — Local Development
 
 Quick guide to run the app locally or via a VS Code Dev Container.
 

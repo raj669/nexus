@@ -2,18 +2,40 @@ import { useState } from 'react';
 import { Bell, LogOut, Menu, Moon, Sun } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLms } from '../../context/LmsContext';
+import type { Role } from '../../lib/types';
 
-const titleMap: Record<string, string> = {
+const staticTitleMap: Record<string, string> = {
   '/app': 'Dashboard',
-  '/app/classes': 'Classes',
-  '/app/assignments': 'Assignments',
-  '/app/collaboration': 'Collaboration',
+  '/app/collaboration': 'Discussions',
   '/app/calendar': 'Calendar',
   '/app/resources': 'Resources',
-  '/app/analytics': 'Analytics',
   '/app/settings': 'Settings',
-  '/app/admin': 'Admin',
+  '/app/admin': 'User Management',
 };
+
+const rolePageTitles: Record<string, Partial<Record<Role, string>>> = {
+  '/app/classes': {
+    student: 'My Courses',
+    teacher: 'My Classes',
+    admin: 'All Classes',
+  },
+  '/app/assignments': {
+    student: 'Assignments',
+    teacher: 'Grade Center',
+    admin: 'Assignment Overview',
+  },
+  '/app/analytics': {
+    student: 'My Grades',
+    teacher: 'Class Analytics',
+    admin: 'Platform Analytics',
+  },
+};
+
+function getTitle(pathname: string, role: Role | null): string {
+  const roleMap = rolePageTitles[pathname];
+  if (roleMap && role && roleMap[role]) return roleMap[role]!;
+  return staticTitleMap[pathname] ?? 'Workspace';
+}
 
 export default function Topbar() {
   const location = useLocation();
@@ -21,7 +43,13 @@ export default function Topbar() {
   const { currentUser, currentRole, signOut, state, toggleSidebar, toggleTheme, markNotificationRead } = useLms();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = state.notifications.filter((notification) => notification.unread).length;
-  const title = titleMap[location.pathname] ?? 'Workspace';
+  const title = getTitle(location.pathname, currentRole);
+
+  const roleColors: Record<Role, string> = {
+    student: 'text-blue-400',
+    teacher: 'text-emerald-400',
+    admin: 'text-purple-400',
+  };
 
   return (
     <header className="sticky top-0 z-20 border-b border-border-subtle bg-[var(--panel)]/92 backdrop-blur-2xl">
@@ -31,7 +59,7 @@ export default function Topbar() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="hidden lg:block">
-            <p className="text-xs uppercase tracking-[0.28em] text-text-muted">Nexus LMS</p>
+            <p className="text-xs uppercase tracking-[0.28em] text-text-muted">UniPlanner</p>
             <h1 className="mt-1 text-2xl font-semibold text-text-primary">{title}</h1>
           </div>
           <div className="flex-1" />
@@ -46,7 +74,7 @@ export default function Topbar() {
               aria-label="Open notifications"
               className="relative rounded-2xl border border-border-subtle p-2 text-text-secondary transition hover:border-primary/40 hover:text-text-primary"
             >
-            <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5" />
               {unreadCount ? <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[var(--panel)]" /> : null}
             </button>
 
@@ -96,7 +124,9 @@ export default function Topbar() {
           <div className="hidden items-center gap-3 rounded-2xl border border-border-subtle bg-white/5 px-3 py-2 lg:flex">
             <div className="text-right">
               <p className="text-sm font-semibold text-text-primary">{currentUser?.name}</p>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-text-muted">{currentRole}</p>
+              <p className={`text-[10px] uppercase tracking-[0.24em] font-semibold ${currentRole ? roleColors[currentRole] : 'text-text-muted'}`}>
+                {currentRole === 'admin' ? 'Administrator' : currentRole === 'teacher' ? 'Educator' : 'Student'}
+              </p>
             </div>
             <img src={currentUser?.avatar} alt={currentUser?.name ?? 'User'} className="h-10 w-10 rounded-xl object-cover" />
           </div>

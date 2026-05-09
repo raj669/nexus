@@ -11,9 +11,9 @@ import {
   UserAccount,
 } from './types';
 
-export const STORAGE_KEY = 'nexus-lms-state';
-export const SESSION_KEY = 'nexus-lms-session';
-export const PREFERENCES_KEY = 'nexus-lms-preferences';
+export const STORAGE_KEY = 'uniplanner-state';
+export const SESSION_KEY = 'uniplanner-session';
+export const PREFERENCES_KEY = 'uniplanner-preferences';
 
 const PASSWORD_HASH = '978c26d91294fd7eba1798cb475d5da104f51a787c5b25e3940b26ec940c4d9a';
 
@@ -21,7 +21,7 @@ export const seededUsers: UserAccount[] = [
   {
     id: 'user-student',
     name: 'Alex Rivers',
-    email: 'alex@nexus.dev',
+    email: 'alex@uniplanner.dev',
     role: 'student',
     title: 'Product Design Student',
     avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop',
@@ -34,7 +34,7 @@ export const seededUsers: UserAccount[] = [
   {
     id: 'user-teacher',
     name: 'Sarah Jenkins',
-    email: 'sarah@nexus.dev',
+    email: 'sarah@uniplanner.dev',
     role: 'teacher',
     title: 'Senior Instructor',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop',
@@ -47,7 +47,7 @@ export const seededUsers: UserAccount[] = [
   {
     id: 'user-admin',
     name: 'Noah Patel',
-    email: 'admin@nexus.dev',
+    email: 'admin@uniplanner.dev',
     role: 'admin',
     title: 'Platform Administrator',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop',
