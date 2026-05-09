@@ -25,9 +25,9 @@ export default function Layout({ children }: LayoutProps) {
         />
       ) : null}
       <Sidebar />
-      <div className="relative z-10 flex min-h-screen flex-1 flex-col lg:pl-80">
+      <div className="relative z-10 flex min-h-screen flex-1 flex-col sm:pl-72 lg:pl-80">
         <Topbar />
-        <main className="flex-1 overflow-x-hidden px-4 pb-8 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+        <main className="flex-1 overflow-x-hidden px-3 pb-6 pt-3 sm:px-4 sm:pb-8 sm:pt-4 md:px-6 lg:px-8 lg:pb-8 lg:pt-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -35,7 +35,7 @@ export default function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
             >
               {children}
             </motion.div>

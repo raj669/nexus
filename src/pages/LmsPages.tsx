@@ -179,24 +179,24 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_35%),radial-gradient(circle_at_top_right,_rgba(99,102,241,0.16),_transparent_30%),linear-gradient(180deg,#020617,#0f172a_45%,#111827)] text-text-primary">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-8 px-6 py-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/20 backdrop-blur-2xl lg:p-12">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-8 md:gap-8 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-10 lg:py-8">
+        <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/20 backdrop-blur-2xl sm:rounded-3xl sm:p-6 lg:rounded-[2rem] lg:p-12">
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_40%)]" />
-          <div className="relative z-10 flex h-full flex-col justify-between gap-10">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-text-secondary">
-                <Sparkles className="h-4 w-4 text-accent" />
+          <div className="relative z-10 flex h-full flex-col justify-between gap-6 sm:gap-8 lg:gap-10">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-text-secondary sm:gap-3 sm:px-4 sm:py-2 sm:text-sm">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent sm:h-4 sm:w-4" />
                 UniPlanner for modern classrooms
               </div>
-              <div className="space-y-4 max-w-2xl">
-                <h1 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl">
+              <div className="space-y-3 sm:space-y-4">
+                <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
                   Classroom software that actually moves faster than the work.
                 </h1>
-                <p className="max-w-xl text-lg leading-8 text-text-secondary">
+                <p className="max-w-xl text-base leading-7 text-text-secondary sm:text-lg sm:leading-8">
                   A role-aware LMS for students, teachers, and administrators with real CRUD, live collaboration, analytics, scheduling, and persistent preferences.
                 </p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-3">
                 <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Role access</p>
                   <p className="mt-2 text-xl font-semibold text-white">JWT-ready sessions</p>
@@ -228,43 +228,43 @@ export function LoginPage() {
         </section>
 
         <section className="flex items-center justify-center">
-          <div className="w-full max-w-xl rounded-[2rem] border border-white/10 bg-[var(--panel)] p-6 shadow-2xl shadow-black/20 backdrop-blur-2xl sm:p-8">
-            <div className="mb-8 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-text-muted">Sign in</p>
-                <h2 className="mt-2 text-3xl font-semibold text-text-primary">Access your workspace</h2>
+          <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-[var(--panel)] p-4 shadow-2xl shadow-black/20 backdrop-blur-2xl sm:rounded-3xl sm:p-6 lg:p-8">
+            <div className="mb-6 flex flex-col items-start gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-text-muted sm:text-xs">Sign in</p>
+                <h2 className="mt-1 text-2xl font-semibold text-text-primary sm:mt-2 sm:text-3xl">Access your workspace</h2>
               </div>
-              <div className="rounded-2xl border border-border-subtle bg-white/5 p-3">
-                <Lock className="h-5 w-5 text-primary" />
+              <div className="rounded-2xl border border-border-subtle bg-white/5 p-2.5 sm:p-3">
+                <Lock className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
               </div>
             </div>
 
-            <form className="space-y-5" onSubmit={onSubmit}>
+            <form className="space-y-4 sm:space-y-5" onSubmit={onSubmit}>
               <div>
-                <label className="mb-2 block text-sm font-medium text-text-secondary" htmlFor="email">Email</label>
-                <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-text-primary outline-none transition focus:border-primary/60" placeholder="alex@uniplanner.dev" />
+                <label className="mb-1.5 block text-sm font-medium text-text-secondary sm:mb-2" htmlFor="email">Email</label>
+                <input id="email" value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="w-full rounded-xl border border-border-subtle bg-white/5 px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary/60 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base" placeholder="alex@uniplanner.dev" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-text-secondary" htmlFor="password">Password</label>
-                <input id="password" value={password} onChange={(event) => setPassword(event.target.value)} type="password" className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-text-primary outline-none transition focus:border-primary/60" placeholder="classroom123!" />
+                <label className="mb-1.5 block text-sm font-medium text-text-secondary sm:mb-2" htmlFor="password">Password</label>
+                <input id="password" value={password} onChange={(event) => setPassword(event.target.value)} type="password" className="w-full rounded-xl border border-border-subtle bg-white/5 px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-primary/60 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base" placeholder="classroom123!" />
               </div>
 
               {error ? (
-                <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200">
-                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200 sm:gap-3 sm:rounded-2xl sm:p-4 sm:text-sm">
+                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
                   <span>{error}</span>
                 </div>
               ) : null}
 
-              <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-secondary px-4 py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60">
+              <button type="submit" disabled={busy} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-secondary px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base">
                 {busy ? 'Signing in...' : 'Open workspace'}
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </button>
             </form>
 
-            <div className="mt-6 space-y-3">
-              <p className="text-sm text-text-secondary">Quick demo access</p>
-              <div className="grid gap-3 sm:grid-cols-3">
+            <div className="mt-4 space-y-2 sm:mt-6 sm:space-y-3">
+              <p className="text-xs text-text-secondary sm:text-sm">Quick demo access</p>
+              <div className="grid gap-2 sm:gap-3 sm:grid-cols-3">
                 {quickAccounts.map((account) => (
                   <button
                     key={account.role}
@@ -273,10 +273,10 @@ export function LoginPage() {
                       setEmail(account.email);
                       setPassword('classroom123!');
                     }}
-                    className="rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-left transition hover:border-primary/50 hover:bg-primary/10"
+                    className="rounded-xl border border-border-subtle bg-white/5 px-3 py-2 text-left text-sm transition hover:border-primary/50 hover:bg-primary/10 sm:rounded-2xl sm:px-4 sm:py-3"
                   >
-                    <p className="text-xs uppercase tracking-[0.24em] text-text-muted">{roleLabels[account.role]}</p>
-                    <p className="mt-1 text-sm font-semibold text-text-primary">{account.email}</p>
+                    <p className="text-[9px] uppercase tracking-[0.24em] text-text-muted sm:text-xs">{roleLabels[account.role]}</p>
+                    <p className="mt-0.5 font-semibold text-text-primary sm:mt-1 sm:text-sm">{account.email}</p>
                   </button>
                 ))}
               </div>
@@ -306,72 +306,72 @@ function StudentDashboard() {
   const gradedWork = state.submissions.filter((s) => s.score !== undefined).slice(0, 3);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Hero */}
-      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(37,99,235,0.25),rgba(56,189,248,0.1),rgba(15,118,110,0.08))] p-7 sm:p-10">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 text-xs uppercase tracking-widest text-blue-300">
+      <section className="overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(37,99,235,0.25),rgba(56,189,248,0.1),rgba(15,118,110,0.08))] p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2rem] lg:p-10">
+        <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-2.5 py-1 text-[9px] uppercase tracking-widest text-blue-300 sm:px-3 sm:py-1.5 sm:text-xs">
               <BookOpen className="h-3 w-3" />
               Student Portal
             </div>
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
               Hey, {currentUser?.name.split(' ')[0] ?? 'Student'}!
             </h1>
-            <p className="max-w-xl text-lg text-white/70">
+            <p className="max-w-xl text-sm text-white/70 sm:text-base lg:text-lg">
               You have <span className="font-semibold text-white">{pendingAssignments.length} pending assignment{pendingAssignments.length !== 1 ? 's' : ''}</span> and a <span className="font-semibold text-amber-300">{analytics.streak}-day streak</span> going. Keep it up!
             </p>
-            <div className="flex flex-wrap gap-3 pt-1">
-              <button type="button" onClick={() => navigate('/app/assignments')} className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:brightness-110">
-                <ClipboardCheck className="h-4 w-4" />
+            <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:gap-3">
+              <button type="button" onClick={() => navigate('/app/assignments')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition hover:brightness-110 sm:rounded-2xl sm:px-5 sm:py-2.5 sm:text-sm">
+                <ClipboardCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 View Assignments
               </button>
-              <button type="button" onClick={() => navigate('/app/classes')} className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">
-                <BookOpen className="h-4 w-4" />
+              <button type="button" onClick={() => navigate('/app/classes')} className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 sm:rounded-2xl sm:px-5 sm:py-2.5 sm:text-sm">
+                <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 My Courses
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-2 xl:min-w-[260px]">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4 lg:grid-cols-2 lg:min-w-[260px]">
             <div className={metricClass + ' text-center'}>
-              <p className="text-xs uppercase tracking-widest text-text-muted">GPA</p>
-              <p className="mt-1 text-3xl font-bold text-white">{analytics.averageGrade}%</p>
-              <p className="mt-1 text-xs text-text-secondary">Current avg</p>
+              <p className="text-[9px] uppercase tracking-widest text-text-muted sm:text-xs">GPA</p>
+              <p className="mt-1 text-2xl font-bold text-white sm:text-3xl">{analytics.averageGrade}%</p>
+              <p className="mt-0.5 text-[9px] text-text-secondary sm:mt-1 sm:text-xs">Current avg</p>
             </div>
             <div className={metricClass + ' text-center'}>
-              <p className="text-xs uppercase tracking-widest text-text-muted">Streak</p>
-              <p className="mt-1 text-3xl font-bold text-amber-400">{analytics.streak}d</p>
-              <p className="mt-1 text-xs text-text-secondary">Days active</p>
+              <p className="text-[9px] uppercase tracking-widest text-text-muted sm:text-xs">Streak</p>
+              <p className="mt-1 text-2xl font-bold text-amber-400 sm:text-3xl">{analytics.streak}d</p>
+              <p className="mt-0.5 text-[9px] text-text-secondary sm:mt-1 sm:text-xs">Days active</p>
             </div>
             <div className={metricClass + ' text-center'}>
-              <p className="text-xs uppercase tracking-widest text-text-muted">Done</p>
-              <p className="mt-1 text-3xl font-bold text-emerald-400">{analytics.completion}%</p>
-              <p className="mt-1 text-xs text-text-secondary">Completion</p>
+              <p className="text-[9px] uppercase tracking-widest text-text-muted sm:text-xs">Done</p>
+              <p className="mt-1 text-2xl font-bold text-emerald-400 sm:text-3xl">{analytics.completion}%</p>
+              <p className="mt-0.5 text-[9px] text-text-secondary sm:mt-1 sm:text-xs">Completion</p>
             </div>
             <div className={metricClass + ' text-center'}>
-              <p className="text-xs uppercase tracking-widest text-text-muted">Courses</p>
-              <p className="mt-1 text-3xl font-bold text-blue-400">{activeCourses.length}</p>
-              <p className="mt-1 text-xs text-text-secondary">Enrolled</p>
+              <p className="text-[9px] uppercase tracking-widest text-text-muted sm:text-xs">Courses</p>
+              <p className="mt-1 text-2xl font-bold text-blue-400 sm:text-3xl">{activeCourses.length}</p>
+              <p className="mt-0.5 text-[9px] text-text-secondary sm:mt-1 sm:text-xs">Enrolled</p>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="grid gap-4 sm:gap-6 lg:gap-6 lg:grid-cols-[1.5fr_1fr]">
         {/* Left column */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Pending assignments */}
           <ShellSection
             title="Pending Assignments"
             subtitle="Work due soon — click an assignment to submit."
-            action={<button type="button" onClick={() => navigate('/app/assignments')} className="text-sm font-medium text-primary hover:underline">View all</button>}
+            action={<button type="button" onClick={() => navigate('/app/assignments')} className="text-xs font-medium text-primary hover:underline sm:text-sm">View all</button>}
           >
             {pendingAssignments.length === 0 ? (
-              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5 text-center text-sm text-emerald-300">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-center text-xs text-emerald-300 sm:rounded-2xl sm:p-5 sm:text-sm">
                 All caught up! No pending assignments.
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {pendingAssignments.map((a) => {
                   const cls = state.classes.find((c) => c.id === a.classId);
                   const urgency = a.dueDate ? 'border-l-amber-400' : 'border-l-border-subtle';
@@ -380,19 +380,19 @@ function StudentDashboard() {
                       key={a.id}
                       type="button"
                       onClick={() => navigate('/app/assignments')}
-                      className={`w-full rounded-2xl border border-border-subtle border-l-4 ${urgency} bg-white/5 p-4 text-left transition hover:bg-white/10`}
+                      className={`w-full rounded-xl border border-border-subtle border-l-4 ${urgency} bg-white/5 p-3 text-left transition hover:bg-white/10 sm:rounded-2xl sm:p-4`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-text-primary">{a.title}</p>
-                          <p className="mt-1 text-sm text-text-secondary">{cls?.title ?? 'Unknown class'} · {a.kind}</p>
+                      <div className="flex items-start justify-between gap-2 sm:gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-semibold text-text-primary sm:text-base">{a.title}</p>
+                          <p className="mt-0.5 truncate text-xs text-text-secondary sm:mt-1 sm:text-sm">{cls?.title ?? 'Unknown class'} · {a.kind}</p>
                         </div>
                         <div className="text-right">
                           <ViewPill label={a.kind} />
-                          {a.dueDate && <p className="mt-1.5 text-xs text-amber-400 font-medium">Due {a.dueDate}</p>}
+                          {a.dueDate && <p className="mt-1 text-[9px] text-amber-400 font-medium sm:mt-1.5 sm:text-xs">Due {a.dueDate}</p>}
                         </div>
                       </div>
-                      <div className="mt-3 flex items-center justify-between text-xs text-text-muted">
+                      <div className="mt-2 flex items-center justify-between text-[9px] text-text-muted sm:mt-3 sm:text-xs">
                         <span>{a.maxPoints} pts</span>
                         <span className="flex items-center gap-1 text-primary">Submit work →</span>
                       </div>
@@ -2424,18 +2424,18 @@ export function AdminPage() {
   const isAdmin = currentRole === 'admin';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.24em] text-text-muted">Admin center</p>
-        <h1 className="mt-2 text-3xl font-semibold text-text-primary">Security, health, and platform governance</h1>
+        <p className="text-[9px] uppercase tracking-[0.24em] text-text-muted sm:text-xs">Admin center</p>
+        <h1 className="mt-1 text-2xl font-semibold text-text-primary sm:mt-2 sm:text-3xl">Security, health, and platform governance</h1>
       </div>
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 lg:grid-cols-3">
         <StatCard title="Schools online" value="24" note="Multi-tenant environments active" icon={Shield} accent="bg-emerald-500" />
         <StatCard title="Sync health" value="99.98%" note="Background jobs and integrations healthy" icon={CloudUpload} accent="bg-blue-500" />
         <StatCard title="Blocked threats" value="18" note="Rate-limit and auth defenses triggered" icon={Lock} accent="bg-red-500" />
       </div>
       <ShellSection title="Policies and access" subtitle="Admins can tune platform controls and permission models.">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-2 sm:gap-4 md:grid-cols-2">
           {[
             'Role-based middleware',
             'Audit log retention',
@@ -2444,7 +2444,7 @@ export function AdminPage() {
             'Content moderation',
             'Parent portal access',
           ].map((item) => (
-            <div key={item} className="rounded-2xl border border-border-subtle bg-white/5 p-4 text-sm text-text-secondary">
+            <div key={item} className="rounded-lg border border-border-subtle bg-white/5 p-2.5 text-xs text-text-secondary sm:rounded-2xl sm:p-4 sm:text-sm">
               {item}
             </div>
           ))}
@@ -2452,11 +2452,11 @@ export function AdminPage() {
       </ShellSection>
 
       <ShellSection title="User management" subtitle="Create, read, update, and delete users. Grant or change roles.">
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {isAdmin && !showCreateForm && !editingUserId && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 text-text-secondary transition hover:border-primary/40 hover:text-text-primary"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-subtle bg-white/5 px-3 py-2 text-sm text-text-secondary transition hover:border-primary/40 hover:text-text-primary sm:rounded-2xl sm:px-4 sm:py-3"
             >
               <Plus className="h-4 w-4" />
               Add new user
@@ -2464,37 +2464,37 @@ export function AdminPage() {
           )}
 
           {showCreateForm && (
-            <form onSubmit={handleCreateUser} className="space-y-4 rounded-2xl border border-border-subtle bg-black/10 p-6">
+            <form onSubmit={handleCreateUser} className="space-y-3 rounded-lg border border-border-subtle bg-black/10 p-3 sm:space-y-4 sm:rounded-2xl sm:p-6">
               <h3 className="font-semibold text-text-primary">Create new user</h3>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2 sm:gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm text-text-secondary">Name *</label>
+                  <label className="mb-1 block text-xs text-text-secondary sm:mb-2 sm:text-sm">Name *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Full name"
-                    className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted"
+                    className="w-full rounded-lg border border-border-subtle bg-white/5 px-2.5 py-2 text-sm outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-text-secondary">Email *</label>
+                  <label className="mb-1 block text-xs text-text-secondary sm:mb-2 sm:text-sm">Email *</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="user@example.com"
-                    className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted"
+                    className="w-full rounded-lg border border-border-subtle bg-white/5 px-2.5 py-2 text-sm outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-text-secondary">Password *</label>
+                  <label className="mb-1 block text-xs text-text-secondary sm:mb-2 sm:text-sm">Password *</label>
                   <input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="Secure password"
-                    className="w-full rounded-2xl border border-border-subtle bg-white/5 px-4 py-3 outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted"
+                    className="w-full rounded-lg border border-border-subtle bg-white/5 px-2.5 py-2 text-sm outline-none focus:border-primary/60 text-text-primary placeholder:text-text-muted sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
                   />
                 </div>
                 <div>

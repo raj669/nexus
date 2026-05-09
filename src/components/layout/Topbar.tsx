@@ -53,19 +53,19 @@ export default function Topbar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-border-subtle bg-[var(--panel)]/92 backdrop-blur-2xl">
-      <div className="flex min-h-[4.75rem] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex flex-1 items-center gap-4">
-          <button type="button" onClick={toggleSidebar} className="rounded-2xl border border-border-subtle p-2 text-text-secondary transition hover:border-primary/40 hover:text-text-primary lg:hidden">
-            <Menu className="h-5 w-5" />
+      <div className="flex min-h-12 items-center justify-between gap-2 px-3 py-2 sm:min-h-[3.75rem] sm:gap-4 sm:px-4 md:px-6 lg:min-h-[4.75rem] lg:px-8 lg:py-3">
+        <div className="flex flex-1 items-center gap-2 sm:gap-4">
+          <button type="button" onClick={toggleSidebar} className="rounded-2xl border border-border-subtle p-1.5 text-text-secondary transition hover:border-primary/40 hover:text-text-primary lg:hidden sm:p-2" aria-label="Toggle sidebar">
+            <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
           <div className="hidden lg:block">
-            <p className="text-xs uppercase tracking-[0.28em] text-text-muted">UniPlanner</p>
-            <h1 className="mt-1 text-2xl font-semibold text-text-primary">{title}</h1>
+            <p className="text-[9px] uppercase tracking-[0.2em] text-text-muted sm:text-[10px] sm:tracking-[0.24em]\">UniPlanner</p>
+            <h1 className="mt-0.5 text-lg font-semibold text-text-primary sm:mt-1 sm:text-2xl">{title}</h1>
           </div>
           <div className="flex-1" />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <div className="relative">
             <button
               type="button"
